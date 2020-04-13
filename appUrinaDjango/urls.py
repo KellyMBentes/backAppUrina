@@ -15,11 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users import urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('users.urls', 'api_users')),
+    path('api/personaldata/', include('personalData.urls', 'api_personalData')),
     path('api/notification/', include('notifications.urls', 'api_notifications'))
 
     # REST FRAMEWORK
