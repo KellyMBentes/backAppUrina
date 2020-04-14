@@ -32,7 +32,7 @@ class PersonalData(models.Model):
     hasQrMedication            = models.BooleanField()
 
     def __str__(self):
-        return  self.name
+        return self.name
 
 
 
