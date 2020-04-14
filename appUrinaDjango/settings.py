@@ -46,7 +46,10 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'users',
     'notifications',
-    'personalData'
+    'personalData',
+    'questions',
+    'peeDiary',
+    'liquidIntake',
 ]
 
 REST_FRAMEWORK = {

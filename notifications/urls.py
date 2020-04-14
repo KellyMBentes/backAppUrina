@@ -1,10 +1,9 @@
 from django.urls import path
-
-from .views import create_notification
+from notifications import views
 
 
 app_name = 'notification'
 
 urlpatterns = [
-    path('create/', create_notification, name="create")
+    path('create', views.create_notification, name="create")
 ]

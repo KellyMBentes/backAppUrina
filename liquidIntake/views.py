@@ -1,21 +1,18 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import status
 from rest_framework.response import Response
-
-from .serializers import NotificationSerializer
 from rest_framework.decorators import api_view
-from .models import Notification
+from .serializers import LiquidIntakeSerializer
+from .models import LiquidIntake
+
 
 @api_view(['POST', ])
-def create_notification(request):
+def create_liquidIntake(request):
     user = request.user
 
-    notification = Notification(userId=user)
+    liquidIntake = LiquidIntake(user=user)
 
     if request.method == 'POST':
-        serializer = NotificationSerializer(notification, data=request.data)
+        serializer = LiquidIntakeSerializer(liquidIntake, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

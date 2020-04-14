@@ -1,21 +1,19 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import status
 from rest_framework.response import Response
 
-from .serializers import NotificationSerializer
+from .serializers import QuestionFormSerializer
 from rest_framework.decorators import api_view
-from .models import Notification
+from .models import QuestionForm
+
 
 @api_view(['POST', ])
-def create_notification(request):
+def create_questionForm(request):
     user = request.user
 
-    notification = Notification(userId=user)
+    questionForm = QuestionForm(user=user)
 
     if request.method == 'POST':
-        serializer = NotificationSerializer(notification, data=request.data)
+        serializer = QuestionFormSerializer(questionForm, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
