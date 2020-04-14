@@ -3,14 +3,14 @@ from users.models import CustomUser
 # Create your models here.
 
 class Phone(models.Model):
-    number                     = models.CharField(max_length=15)
+    number                     = models.CharField(max_length=15, unique=True)
 
     def __str__(self):
         return self.number
 
 class PersonalData(models.Model):
     user                       = models.OneToOneField(to=CustomUser, on_delete=models.CASCADE)
-    phone                      = models.OneToOneField(to=Phone, on_delete=models.CASCADE)
+    phone                      = models.ForeignKey(to=Phone, on_delete=models.CASCADE)
     name                       = models.CharField(max_length=55)
     birthDate                  = models.DateField()
     gender                     = models.CharField(max_length=15)
