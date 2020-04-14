@@ -1,9 +1,18 @@
 from rest_framework import serializers
+from .models import Notification, Option
 
-from .models import Notification
 
 class NotificationSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    userId = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+
     class Meta:
         model = Notification
-        fields = ['id', 'option', 'user']
+        fields = ['id', 'userId', 'isSelectedAll', 'isPriority']
+
+
+class OptionSerializer(serializers.ModelSerializer):
+    notificationId = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+
+    class Meta:
+        model = Option
+        fields = ['id', 'isSelected', 'isPriority', 'text', 'type']
