@@ -56,7 +56,7 @@ def delete_personalData(request, id):
         if operation:
             data["success"] = "Delete successful"
         else:
-            data["failuer"] = "Delete unsuccesful"
+            data["failure"] = "Delete unsuccesful"
         return Response(data=data)
 
 @api_view(['POST', ])
