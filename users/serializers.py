@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from .models import CustomUser
 
 class RegistrationSerializer(serializers.ModelSerializer):
-
     password2 = serializers.CharField(style={'inpyt_type':'password'}, write_only=True)
 
     class Meta:

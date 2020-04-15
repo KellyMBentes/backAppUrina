@@ -13,3 +13,5 @@ pytz==2019.3
 six==1.14.0
 sqlparse==0.2.4
 virtualenv==20.0.14
+drf-yasg==1.17.1
+
