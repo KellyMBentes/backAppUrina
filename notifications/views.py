@@ -47,7 +47,8 @@ def create_notification(request):
 
 @api_view(['POST', ])
 def create_option(request, pk):
-    option = Option(notificationId=pk)
+    notification = Notification.objects.get(id=pk)
+    option = Option(notificationId=notification)
 
     if request.method == 'POST':
         serializer = OptionSerializer(option, data=request.data)
@@ -70,7 +71,7 @@ def update_notification(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "delete successful"
+            data["success"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,7 +89,7 @@ def update_option(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "delete successful"
+            data["success"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
