@@ -1,10 +1,20 @@
 from django.shortcuts import render
+from drf_yasg import openapi
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import PersonalData, Phone
 from .serializers import PersonalDataSerializer, PhoneSerializer
-# Create your views here.
+from drf_yasg.utils import swagger_auto_schema
+
+user_response = openapi.Response('response description', PersonalDataSerializer)
+
+
+@swagger_auto_schema(methods=['post'], query_serializer=PersonalDataSerializer,
+        responses = {
+            '200': 'OK',
+            '400': 'Bad Request'
+        })
 
 @api_view(['POST', ])
 def create_personalData(request):
@@ -16,6 +26,7 @@ def create_personalData(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(method='get', responses={200: user_response})
 @api_view(['GET', ])
 def read_personalData(request, id):
     try:
