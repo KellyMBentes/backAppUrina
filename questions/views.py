@@ -72,8 +72,8 @@ def delete_questionForm(request, pk):
 
 @api_view(['POST', ])
 def create_option(request, pk):
-
-    option = Option(formId=pk)
+    questionForm= QuestionForm.objects.get(id=pk)
+    option = Option(formId=questionForm)
 
     if request.method == 'POST':
         serializer = OptionSerializer(option, data=request.data)
