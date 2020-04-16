@@ -5,9 +5,9 @@ app_name = 'peeDiary'
 
 urlpatterns = [
     path('create', views.create_peeDiary, name="create"),
-    path('<int:id>/', views.read_peeDiary, name="detail"),
-    path('', views.get_all_peeDiary, name="get-all-pee-diary"),
-    path('edit/<id>', views.update_peeDiary, name="edit"),
-    path('delete/<id>', views.delete_peeDiary, name="delete"),
+    path('<int:pk>/', views.read_peeDiary, name="detail"),
+    path('', views.list_peeDiary, name="list-peeDiary"),
+    path('edit/<int:pk>', views.update_peeDiary, name="edit"),
+    path('delete/<int:pk>', views.delete_peeDiary, name="delete"),
 
 ]
