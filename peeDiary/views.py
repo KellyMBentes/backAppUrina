@@ -31,6 +31,50 @@ def read_peeDiary(request, id):
         return Response(serializer.data)
 
 
+@api_view(['GET', ])
+def get_all_peeDiary(request, offset=-1, limit=-1, peeVolume=-1):
+    try:
+        user = request.user
+        data = {}
+        offset = request.query_params.get('offset', None)
+        limit = request.query_params.get('limit', None)
+        peeVolume = request.query_params.get('peeVolume', None)
+        if offset is not None and limit is not None and peeVolume is not None:
+            offset = int(offset)
+            limit = int(limit)
+            peeVolume = int(peeVolume)
+            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)[offset:limit]
+        elif offset is not None and limit is not None:
+            offset = int(offset)
+            limit = int(limit)
+            pee = PeeDiary.objects.all().filter(user=user)[offset:limit]
+        elif offset is None and limit is not None and peeVolume is not None:
+            limit = int(limit)
+            peeVolume = int(peeVolume)
+            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)[:limit]
+        elif offset is None and limit is None and peeVolume is not None:
+            peeVolume = int(peeVolume)
+            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)
+            print("enteri aqui")
+        elif offset is not None and limit is None:
+           data['error'] = "offset param requires a limit param."
+           return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        elif offset is None and limit is not None:
+            limit = int(limit)
+            pee = PeeDiary.objects.all().filter(user=user)[:limit]
+        else:
+            pee = PeeDiary.objects.filter(user=user)
+            print(pee)
+    except PeeDiary.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        print("#",pee)
+        serializer = PeeDiarySerializer(pee, many=True)
+        print("@",serializer.data)
+        return Response(serializer.data)
+
+
 @api_view(['PUT', ])
 def update_peeDiary(request, id):
     try:
