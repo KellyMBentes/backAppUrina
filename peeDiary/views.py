@@ -20,9 +20,9 @@ def create_peeDiary(request):
 
 
 @api_view(['GET', ])
-def read_peeDiary(request, id):
+def read_peeDiary(request, pk):
     try:
-        pee = PeeDiary.objects.get(id=id)
+        pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -32,7 +32,7 @@ def read_peeDiary(request, id):
 
 
 @api_view(['GET', ])
-def get_all_peeDiary(request, offset=-1, limit=-1, peeVolume=-1):
+def list_peeDiary(request):
     try:
         user = request.user
         data = {}
@@ -42,43 +42,41 @@ def get_all_peeDiary(request, offset=-1, limit=-1, peeVolume=-1):
         if offset is not None and limit is not None and peeVolume is not None:
             offset = int(offset)
             limit = int(limit)
-            peeVolume = int(peeVolume)
-            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)[offset:limit]
+            peeVolume = float(peeVolume)
+            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[offset:limit]
         elif offset is not None and limit is not None:
             offset = int(offset)
             limit = int(limit)
-            pee = PeeDiary.objects.all().filter(user=user)[offset:limit]
+            pee = PeeDiary.objects.filter(user=user)[offset:limit]
         elif offset is None and limit is not None and peeVolume is not None:
             limit = int(limit)
-            peeVolume = int(peeVolume)
-            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)[:limit]
+            peeVolume = float(peeVolume)
+            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[:limit]
         elif offset is None and limit is None and peeVolume is not None:
-            peeVolume = int(peeVolume)
-            pee = PeeDiary.objects.all().filter(user=user, peeVolume=peeVolume)
-            print("enteri aqui")
+            peeVolume = float(peeVolume)
+            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)
+            # pee = PeeDiary.objects.filter(user=user, peeVolume__gte=peeVolume)  # greater than equal
+            # pee = PeeDiary.objects.filter(user=user, peeVolume__lte=peeVolume)  # less than equal
         elif offset is not None and limit is None:
-           data['error'] = "offset param requires a limit param."
-           return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            data['error'] = "offset param requires a limit param."
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         elif offset is None and limit is not None:
             limit = int(limit)
-            pee = PeeDiary.objects.all().filter(user=user)[:limit]
+            pee = PeeDiary.objects.filter(user=user)[:limit]
         else:
             pee = PeeDiary.objects.filter(user=user)
-            print(pee)
     except PeeDiary.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        print("#",pee)
         serializer = PeeDiarySerializer(pee, many=True)
-        print("@",serializer.data)
         return Response(serializer.data)
 
 
 @api_view(['PUT', ])
-def update_peeDiary(request, id):
+def update_peeDiary(request, pk):
     try:
-        pee = PeeDiary.objects.get(id=id)
+        pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -93,9 +91,9 @@ def update_peeDiary(request, id):
 
 
 @api_view(['DELETE', ])
-def delete_peeDiary(request, id):
+def delete_peeDiary(request, pk):
     try:
-        pee = PeeDiary.objects.get(id=id)
+        pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
