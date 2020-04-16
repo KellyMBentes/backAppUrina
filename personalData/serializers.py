@@ -1,3 +1,4 @@
+from drf_yasg import openapi
 from rest_framework import serializers
 from .models import PersonalData, Phone
 from django.contrib.auth.models import User
