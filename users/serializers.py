@@ -5,11 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from .models import CustomUser
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'inpyt_type':'password'}, write_only=True)
+    confirm_password = serializers.CharField(style={'inpyt_type': 'password'}, write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'password2']
+        fields = ['email', 'password', 'confirm_password']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -19,9 +19,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
             email=self.validated_data['email'],
         )
         password = self.validated_data['password']
-        password2 = self.validated_data['password2']
+        confirm_password = self.validated_data['confirm_password']
 
-        if password != password2:
+        if password != confirm_password:
             raise serializers.ValidationError({'password': 'Passwords must match'})
 
         user.set_password(password)

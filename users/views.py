@@ -1,16 +1,17 @@
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from users.serializers import RegistrationSerializer
 from rest_framework.authtoken import views as auth_views
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
-
 from .serializers import MyAuthTokenSerializer
 
 #Obtem o token no momento do login passando o email e a senha
+@permission_classes([AllowAny])
 class MyAuthToken(auth_views.ObtainAuthToken):
     serializer_class = MyAuthTokenSerializer
     if coreapi is not None and coreschema is not None:
@@ -42,6 +43,7 @@ class MyAuthToken(auth_views.ObtainAuthToken):
 obtain_auth_token = MyAuthToken.as_view()
 
 @api_view(['POST',])
+@permission_classes([AllowAny])
 def registration_view(request):
 
     if request.method == 'POST':
