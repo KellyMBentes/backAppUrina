@@ -7,5 +7,5 @@ class PeeDiarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PeeDiary
-        fields = ['id', 'createdDate', 'peeVolume', 'effortToUrinate', 'hasLost',
-                  'isDoingPhysicalActivity', 'referenceVolume', 'user']
+        fields = ['id', 'user', 'createdDate', 'peeVolume', 'effortToUrinate', 'hasLost',
+                  'isDoingPhysicalActivity', 'referenceVolume']
