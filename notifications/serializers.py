@@ -15,4 +15,4 @@ class OptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Option
-        fields = ['id', 'isSelected', 'isPriority', 'text', 'type']
+        fields = ['id', 'notificationId', 'isSelected', 'isPriority', 'text', 'type']
