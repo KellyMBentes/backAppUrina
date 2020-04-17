@@ -9,6 +9,9 @@ from .models import PeeDiary
 pee_diary_response = openapi.Response('response description', PeeDiarySerializer)
 pee_diary_list_response = openapi.Response('response description', PeeDiarySerializer(many=True))
 
+offset = openapi.Parameter('offset', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
+limit = openapi.Parameter('limit', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
+peeVolume = openapi.Parameter('peeVolume', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
 
 
 @swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
@@ -51,6 +54,7 @@ def read_peeDiary(request, pk):
 
 
 @swagger_auto_schema(method='get',
+    manual_parameters=[offset, limit, peeVolume],
     responses={
         '200': pee_diary_list_response,
         '400': 'Bad Request',
