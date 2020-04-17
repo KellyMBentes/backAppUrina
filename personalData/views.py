@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from drf_yasg import openapi
 from rest_framework import status, viewsets
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import PersonalData, Phone
@@ -8,11 +9,12 @@ from .serializers import PersonalDataSerializer, PhoneSerializer
 from drf_yasg.utils import swagger_auto_schema
 
 user_response = openapi.Response('response description', PersonalDataSerializer)
+phone_response = openapi.Response('response description', PhoneSerializer)
 
 
-@swagger_auto_schema(method= 'post', query_serializer=PersonalDataSerializer,
+@swagger_auto_schema(method='post', request_body=PersonalDataSerializer,
     responses={
-        '200': 'OK',
+        '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
     })
@@ -26,11 +28,13 @@ def create_personalData(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(method= 'put', query_serializer=PersonalDataSerializer,
+
+@swagger_auto_schema(method='put', request_body=PersonalDataSerializer,
     responses={
-        '200': 'OK',
+        '200': 'Success',
         '400': 'Bad Request',
         '401': 'Unauthorized',
+        '404': 'Not Found',
     })
 @api_view(['PUT', ])
 def update_personalData(request, id):
@@ -53,7 +57,8 @@ def update_personalData(request, id):
     responses={
         '200': user_response,
         '400': 'Bad Request',
-        '401': 'Unauthorized'
+        '401': 'Unauthorized',
+        '404': 'Not Found',
     })
 @api_view(['GET', ])
 def read_personalData(request, id):
@@ -66,11 +71,13 @@ def read_personalData(request, id):
         serializer = PersonalDataSerializer(personal)
         return Response(serializer.data)
 
+
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'OK',
+        '200': 'Success',
         '400': 'Bad Request',
-        '401': 'Unauthorized'
+        '401': 'Unauthorized',
+        '404': 'Not Found',
     })
 @api_view(['DELETE', ])
 def delete_personalData(request, id):
@@ -88,6 +95,13 @@ def delete_personalData(request, id):
             data["failure"] = "Delete unsuccesful"
         return Response(data=data)
 
+
+@swagger_auto_schema(method='post', request_body=PhoneSerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
 @api_view(['POST', ])
 def create_phone(request):
     phone = Phone()
@@ -99,6 +113,13 @@ def create_phone(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': phone_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET', ])
 def read_phone(request, id):
     try:
@@ -111,6 +132,13 @@ def read_phone(request, id):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='put', request_body=PhoneSerializer,
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['PUT', ])
 def update_phone(request, id):
     try:
@@ -128,6 +156,13 @@ def update_phone(request, id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['DELETE', ])
 def delete_phone(request, id):
     try:

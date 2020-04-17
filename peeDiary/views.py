@@ -1,10 +1,22 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import PeeDiarySerializer
 from .models import PeeDiary
 
+pee_diary_response = openapi.Response('response description', PeeDiarySerializer)
+pee_diary_list_response = openapi.Response('response description', PeeDiarySerializer(many=True))
 
+
+
+@swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
 @api_view(['POST', ])
 def create_peeDiary(request):
     user = request.user
@@ -19,6 +31,13 @@ def create_peeDiary(request):
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': pee_diary_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
     try:
@@ -31,6 +50,13 @@ def read_peeDiary(request, pk):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': pee_diary_list_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET', ])
 def list_peeDiary(request):
     try:
@@ -73,6 +99,13 @@ def list_peeDiary(request):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='put', request_body=PeeDiarySerializer,
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['PUT', ])
 def update_peeDiary(request, pk):
     try:
@@ -90,6 +123,13 @@ def update_peeDiary(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['DELETE', ])
 def delete_peeDiary(request, pk):
     try:
