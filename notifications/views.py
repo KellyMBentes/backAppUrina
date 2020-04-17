@@ -7,7 +7,6 @@ from .models import Notification, Option
 
 @api_view(['GET', ])
 def get_notification(request, pk):
-
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
@@ -20,7 +19,6 @@ def get_notification(request, pk):
 
 @api_view(['GET', ])
 def get_option(request, pk):
-
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
@@ -35,7 +33,7 @@ def get_option(request, pk):
 def create_notification(request):
     user = request.user
 
-    notification = Notification(userId=user)
+    notification = Notification(user=user)
 
     if request.method == 'POST':
         serializer = NotificationSerializer(notification, data=request.data)
@@ -48,7 +46,7 @@ def create_notification(request):
 @api_view(['POST', ])
 def create_option(request, pk):
     notification = Notification.objects.get(id=pk)
-    option = Option(notificationId=notification)
+    option = Option(notification=notification)
 
     if request.method == 'POST':
         serializer = OptionSerializer(option, data=request.data)
@@ -60,7 +58,6 @@ def create_option(request, pk):
 
 @api_view(['PUT', ])
 def update_notification(request, pk):
-
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
@@ -78,7 +75,6 @@ def update_notification(request, pk):
 
 @api_view(['PUT', ])
 def update_option(request, pk):
-
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
@@ -96,7 +92,6 @@ def update_option(request, pk):
 
 @api_view(['DELETE', ])
 def delete_notification(request, pk):
-
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
@@ -114,7 +109,6 @@ def delete_notification(request, pk):
 
 @api_view(['DELETE', ])
 def delete_option(request, pk):
-
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:

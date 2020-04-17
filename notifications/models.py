@@ -4,7 +4,7 @@ from users.models import CustomUser
 
 # Objeto notification possui referencia a todas as opcoes do usuario
 class Notification(models.Model):
-    userId = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     isSelectedAll = models.BooleanField(default=True)  # Marca todas as opçoes do usuario como True
     isPriority = models.BooleanField(default=False)
 
@@ -14,7 +14,7 @@ class Notification(models.Model):
 
 
 class Option(models.Model):
-    notificationId = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
     isSelected = models.BooleanField(default=True)
     isPriority = models.BooleanField(default=False)
     text = models.CharField(max_length=100)
