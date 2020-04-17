@@ -1,11 +1,14 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
+from rest_framework.decorators import action
 
 from .models import CustomUser
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    confirm_password = serializers.CharField(style={'inpyt_type': 'password'}, write_only=True)
+    confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
         model = CustomUser
@@ -30,6 +33,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
 # Serializa e valida o email e senha, e se ok gera um token
+@method_decorator(name='validate', decorator=swagger_auto_schema(
+    operation_description="description from swagger_auto_schema via method_decorator"
+))
 class MyAuthTokenSerializer(serializers.Serializer):
     email = serializers.EmailField(label=_("Email"))
     password = serializers.CharField(
@@ -38,6 +44,8 @@ class MyAuthTokenSerializer(serializers.Serializer):
         trim_whitespace=False
     )
 
+    @swagger_auto_schema(method='post', operation_description="POST /articles/{id}/image/")
+    @action(detail=False, methods=['post'])
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
@@ -54,3 +62,27 @@ class MyAuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+class register_response(object):
+    def __init__(self):
+        self.response = 'Succesfully registered a new user.'
+        self.email = 'string'
+        self.token = 'string'
+
+
+class registerSerializer(serializers.Serializer):
+    response = serializers.CharField(max_length=55, default='Succesfully registered a new user.')
+    email = serializers.CharField(max_length=55)
+    token = serializers.CharField(max_length=55)
+
+class login_response(object):
+    def __init__(self):
+        self.token = 'string'
+
+
+class loginSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=55)
+
+
+data1Register = registerSerializer(register_response)
+dataLogin = loginSerializer(login_response)

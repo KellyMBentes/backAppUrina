@@ -6,8 +6,8 @@ from rest_framework.decorators import api_view
 from .serializers import PeeDiarySerializer
 from .models import PeeDiary
 
-pee_diary_response = openapi.Response('response description', PeeDiarySerializer)
-pee_diary_list_response = openapi.Response('response description', PeeDiarySerializer(many=True))
+pee_diary_response = openapi.Response('OK', PeeDiarySerializer)
+pee_diary_list_response = openapi.Response('OK', PeeDiarySerializer(many=True))
 
 offset = openapi.Parameter('offset', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
 limit = openapi.Parameter('limit', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)

@@ -6,8 +6,8 @@ from drf_yasg import openapi
 from .serializers import QuestionFormSerializer, QuestionOptionSerializer
 from .models import QuestionForm, Option
 
-questionForm_response = openapi.Response('response description', QuestionFormSerializer)
-option_response = openapi.Response('response description', QuestionOptionSerializer)
+questionForm_response = openapi.Response('OK', QuestionFormSerializer)
+option_response = openapi.Response('OK', QuestionOptionSerializer)
 
 
 @swagger_auto_schema(method='post', request_body=QuestionFormSerializer,

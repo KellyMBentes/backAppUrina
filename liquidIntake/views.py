@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from .serializers import LiquidIntakeSerializer
 from .models import LiquidIntake
 
-liquid_intake_response = openapi.Response('response description', LiquidIntakeSerializer)
+liquid_intake_response = openapi.Response('OK', LiquidIntakeSerializer)
 
 
 @swagger_auto_schema(method='post', request_body=LiquidIntakeSerializer,

@@ -6,8 +6,8 @@ from .models import Notification, Option
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-notification_response = openapi.Response('response description', NotificationSerializer)
-option_response = openapi.Response('response description', OptionSerializer)
+notification_response = openapi.Response('OK', NotificationSerializer)
+option_response = openapi.Response('OK', OptionSerializer)
 
 
 @swagger_auto_schema(method='get',

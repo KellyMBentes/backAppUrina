@@ -1,18 +1,25 @@
 from django.shortcuts import render
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from users.serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, MyAuthTokenSerializer
 from rest_framework.authtoken import views as auth_views
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
-from .serializers import MyAuthTokenSerializer
+from .serializers import MyAuthTokenSerializer, data1Register, dataLogin
+
+
+#########################################
+#Visualização da serialização do login
 
 #Obtem o token no momento do login passando o email e a senha
 @permission_classes([AllowAny])
 class MyAuthToken(auth_views.ObtainAuthToken):
+
     serializer_class = MyAuthTokenSerializer
     if coreapi is not None and coreschema is not None:
         schema = ManualSchema(
@@ -42,7 +49,32 @@ class MyAuthToken(auth_views.ObtainAuthToken):
 
 obtain_auth_token = MyAuthToken.as_view()
 
-@api_view(['POST',])
+serializerData = openapi.Response('OK', dataLogin)
+
+decorated_login_view = \
+   swagger_auto_schema(
+       method='post', request_body=MyAuthTokenSerializer,
+       responses={
+           '200': serializerData,
+           '201': 'Created',
+           '400': 'Bad Request',
+           '401': 'Unauthorized',
+       }
+   )(obtain_auth_token)
+
+
+#########################################
+#Visualização da serialização do registro
+
+serializerData2 = openapi.Response('OK', data1Register)
+
+@swagger_auto_schema(method='post', request_body=RegistrationSerializer,
+    responses={
+        '200': serializerData2,
+        '201': 'Created',
+        '400': 'Bad Request',
+    })
+@api_view(['POST', ])
 @permission_classes([AllowAny])
 def registration_view(request):
 

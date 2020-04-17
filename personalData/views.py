@@ -8,8 +8,8 @@ from .models import PersonalData, Phone
 from .serializers import PersonalDataSerializer, PhoneSerializer
 from drf_yasg.utils import swagger_auto_schema
 
-user_response = openapi.Response('response description', PersonalDataSerializer)
-phone_response = openapi.Response('response description', PhoneSerializer)
+user_response = openapi.Response('OK', PersonalDataSerializer)
+phone_response = openapi.Response('OK', PhoneSerializer)
 
 
 @swagger_auto_schema(method='post', request_body=PersonalDataSerializer,
