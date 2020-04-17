@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import QuestionForm, Option
 
 
-class OptionSerializer(serializers.ModelSerializer):
+class QuestionOptionSerializer(serializers.ModelSerializer):
     formId = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
     class Meta:

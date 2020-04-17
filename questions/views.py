@@ -1,10 +1,21 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import QuestionFormSerializer, OptionSerializer
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from .serializers import QuestionFormSerializer, QuestionOptionSerializer
 from .models import QuestionForm, Option
 
+questionForm_response = openapi.Response('response description', QuestionFormSerializer)
+option_response = openapi.Response('response description', QuestionOptionSerializer)
 
+
+@swagger_auto_schema(method='post', request_body=QuestionFormSerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
 @api_view(['POST', ])
 def create_questionForm(request):
     user = request.user
@@ -24,6 +35,13 @@ def create_questionForm(request):
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': questionForm_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET'])
 def read_questionForm(request, pk):
     try:
@@ -36,6 +54,13 @@ def read_questionForm(request, pk):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='put', request_body=QuestionFormSerializer,
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['PUT', ])
 def update_questionForm(request, pk):
     try:
@@ -53,6 +78,13 @@ def update_questionForm(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['DELETE', ])
 def delete_questionForm(request, pk):
     try:
@@ -70,19 +102,32 @@ def delete_questionForm(request, pk):
         return Response(data=data)
 
 
+@swagger_auto_schema(method='post', request_body=QuestionOptionSerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
 @api_view(['POST', ])
 def create_option(request, pk):
     questionForm= QuestionForm.objects.get(id=pk)
     option = Option(formId=questionForm)
 
     if request.method == 'POST':
-        serializer = OptionSerializer(option, data=request.data)
+        serializer = QuestionOptionSerializer(option, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': option_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET'])
 def read_option(request, pk):
     try:
@@ -91,10 +136,17 @@ def read_option(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = OptionSerializer(option)
+        serializer = QuestionOptionSerializer(option)
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='put', request_body=QuestionOptionSerializer,
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['PUT', ])
 def update_option(request, pk):
     try:
@@ -103,7 +155,7 @@ def update_option(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
-        serializer = OptionSerializer(option, data=request.data)
+        serializer = QuestionOptionSerializer(option, data=request.data)
         data = {}
         if serializer.is_valid():
             serializer.save()
@@ -111,7 +163,13 @@ def update_option(request, pk):
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'Success',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['DELETE', ])
 def delete_option(request, pk):
     try:
