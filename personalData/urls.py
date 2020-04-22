@@ -9,7 +9,7 @@ urlpatterns = [
     path('edit/<id>', update_personalData, name='edit'),
     path('delete/<id>', delete_personalData, name='delete'),
 
-    path('phone/create', create_phone, name='createPhone'),
+    path('phone/create/<id>', create_phone, name='createPhone'),
     path('phone/<id>/', read_phone, name='detailPhone'),
     path('phone/edit/<id>', update_phone, name='editPhone'),
     path('phone/delete/<id>', delete_phone, name='deletePhone'),

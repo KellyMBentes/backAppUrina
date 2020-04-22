@@ -1,10 +1,11 @@
+from django.contrib.auth.password_validation import validate_password
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import action
-
+from django.contrib.auth.models import User
 from .models import CustomUser
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -32,10 +33,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
+
 # Serializa e valida o email e senha, e se ok gera um token
-@method_decorator(name='validate', decorator=swagger_auto_schema(
-    operation_description="description from swagger_auto_schema via method_decorator"
-))
 class MyAuthTokenSerializer(serializers.Serializer):
     email = serializers.EmailField(label=_("Email"))
     password = serializers.CharField(
@@ -44,8 +43,6 @@ class MyAuthTokenSerializer(serializers.Serializer):
         trim_whitespace=False
     )
 
-    @swagger_auto_schema(method='post', operation_description="POST /articles/{id}/image/")
-    @action(detail=False, methods=['post'])
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
@@ -63,6 +60,15 @@ class MyAuthTokenSerializer(serializers.Serializer):
         attrs['user'] = user
         return attrs
 
+
+#Cria um model para ser mostrado no swagger como formato da resposta para o POST de registro
+class registerSerializer(serializers.Serializer):
+    response = serializers.CharField(max_length=55, default='Succesfully registered a new user.')
+    email = serializers.CharField(max_length=55)
+    token = serializers.CharField(max_length=55)
+
+
+#Cria uma classe somente para preencher o model anterior registerSerializer
 class register_response(object):
     def __init__(self):
         self.response = 'Succesfully registered a new user.'
@@ -70,19 +76,26 @@ class register_response(object):
         self.token = 'string'
 
 
-class registerSerializer(serializers.Serializer):
-    response = serializers.CharField(max_length=55, default='Succesfully registered a new user.')
-    email = serializers.CharField(max_length=55)
+#Cria um model para ser mostrado no swagger como formato de resposta para o POST de login
+class loginSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=55)
 
+
+#Cria uma classe somente para preencher o model anterior loginSerializer
 class login_response(object):
     def __init__(self):
         self.token = 'string'
 
 
-class loginSerializer(serializers.Serializer):
-    token = serializers.CharField(max_length=55)
-
-
 data1Register = registerSerializer(register_response)
 dataLogin = loginSerializer(login_response)
+
+
+#Serializa para alterar a senha do usuário
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value

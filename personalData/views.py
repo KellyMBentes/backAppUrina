@@ -20,7 +20,9 @@ phone_response = openapi.Response('OK', PhoneSerializer)
     })
 @api_view(['POST', ])
 def create_personalData(request):
-    personal = PersonalData()
+    user = request.user
+
+    personal = PersonalData(user=user)
     if request.method == 'POST':
         serializer = PersonalDataSerializer(personal, data=request.data)
         if serializer.is_valid():
@@ -103,14 +105,19 @@ def delete_personalData(request, id):
         '401': 'Unauthorized',
     })
 @api_view(['POST', ])
-def create_phone(request):
-    phone = Phone()
+def create_phone(request, id):
+    personal = PersonalData.objects.get(id=id)
+    phone = Phone(personalData=personal)
+
     if request.method == 'POST':
         serializer = PhoneSerializer(phone, data=request.data)
         if serializer.is_valid():
+            print(personal)
             serializer.save()
+            personal.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @swagger_auto_schema(method='get',
