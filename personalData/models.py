@@ -30,6 +30,12 @@ class PersonalData(models.Model):
     hasPersonalData            = models.BooleanField(default=True)
     hasPrescription            = models.BooleanField()
     hasQrMedication            = models.BooleanField()
+    schooling                  = models.CharField(max_length=55)
+    civilStatus                = models.CharField(max_length=55)
+    birthPlace                 = models.CharField(max_length=55)
+    occupation                 = models.CharField(max_length=55)
+    ethnicity                  = models.CharField(max_length=55)
+    familyIncome               = models.CharField(max_length=55)
 
     def __str__(self):
         return self.name

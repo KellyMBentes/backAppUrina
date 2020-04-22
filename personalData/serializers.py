@@ -14,7 +14,8 @@ class PersonalDataSerializer(serializers.ModelSerializer):
         depth = 1
         fields = ['id', 'name', 'email', 'birthDate', 'gender', 'phone', 'cpf', 'rg', 'cep', 'addressNumber', 'addressComplement',
                   'addressStreet', 'addressCity', 'addressDistrict', 'addressFederalState', 'healthEnsurance', 'healthEnsuranceCompany',
-                  'healthEnsuranceDescription', 'hasHealthData', 'hasPersonalData', 'hasPrescription', 'hasQrMedication']
+                  'healthEnsuranceDescription', 'hasHealthData', 'hasPersonalData', 'hasPrescription', 'hasQrMedication',
+                  'schooling', 'civilStatus', 'birthPlace', 'occupation', 'ethnicity', 'familyIncome']
 
     def get_email_from_user(self, personal):
         email = personal.user.email
