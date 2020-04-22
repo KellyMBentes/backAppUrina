@@ -13,5 +13,4 @@ urlpatterns = [
     path('phone/<id>/', read_phone, name='detailPhone'),
     path('phone/edit/<id>', update_phone, name='editPhone'),
     path('phone/delete/<id>', delete_phone, name='deletePhone'),
-
 ]

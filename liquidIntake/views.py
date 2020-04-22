@@ -50,7 +50,7 @@ def read_liquidIntake(request, id):
 
 @swagger_auto_schema(method='put', request_body=LiquidIntakeSerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -74,7 +74,7 @@ def update_liquidIntake(request, id):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',

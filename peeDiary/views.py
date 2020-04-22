@@ -105,7 +105,7 @@ def list_peeDiary(request):
 
 @swagger_auto_schema(method='put', request_body=PeeDiarySerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -129,7 +129,7 @@ def update_peeDiary(request, pk):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',

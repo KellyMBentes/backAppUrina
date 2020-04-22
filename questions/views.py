@@ -56,7 +56,7 @@ def read_questionForm(request, pk):
 
 @swagger_auto_schema(method='put', request_body=QuestionFormSerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -80,7 +80,7 @@ def update_questionForm(request, pk):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -142,7 +142,7 @@ def read_option(request, pk):
 
 @swagger_auto_schema(method='put', request_body=QuestionOptionSerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -165,7 +165,7 @@ def update_option(request, pk):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',

@@ -100,11 +100,18 @@ def registration_view(request):
 
 #Endpoint para alteração de senha
 class ChangePassword(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, )
 
     def get_object(self, queryset=None):
         return self.request.user
 
+    @swagger_auto_schema(method='put', request_body=ChangePasswordSerializer,
+                         responses={
+                             '200': 'OK',
+                             '400': 'Bad Request',
+                             '401': 'Unauthorized',
+                         })
+    @action(detail=True, methods=['put'])
     def put(self, request, *args, **kwargs):
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
@@ -113,12 +120,17 @@ class ChangePassword(APIView):
             # Check old password
             old_password = serializer.data.get("old_password")
             if not self.object.check_password(old_password):
-                return Response({"old_password": ["Wrong password."]},
+                response = {
+                    'failure': 'Wrong password'
+                }
+                return Response(response,
                                 status=status.HTTP_400_BAD_REQUEST)
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            response = {
+                'success': 'Password updated successfully',
+            }
+            return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

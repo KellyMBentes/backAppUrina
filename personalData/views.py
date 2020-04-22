@@ -33,7 +33,7 @@ def create_personalData(request):
 
 @swagger_auto_schema(method='put', request_body=PersonalDataSerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -76,7 +76,7 @@ def read_personalData(request, id):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -141,7 +141,7 @@ def read_phone(request, id):
 
 @swagger_auto_schema(method='put', request_body=PhoneSerializer,
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -165,7 +165,7 @@ def update_phone(request, id):
 
 @swagger_auto_schema(method='delete',
     responses={
-        '200': 'Success',
+        '200': 'OK',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
