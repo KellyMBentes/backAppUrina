@@ -18,6 +18,7 @@ from .models import CustomUser
 from django.contrib.auth.models import User
 
 
+
 #########################################
 #Visualização da serialização do login
 
@@ -93,6 +94,7 @@ def registration_view(request):
             data['response'] = 'Succesfully registered a new user.'
             data['email'] = user.email
             data['token'] = token
+
         else:
             data = serializer.errors
         return Response(data=data)

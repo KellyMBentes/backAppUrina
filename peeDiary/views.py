@@ -1,10 +1,16 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
+from rest_framework import status, generics
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from .serializers import PeeDiarySerializer
 from .models import PeeDiary
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+from appUrinaDjango import settings
+from django.shortcuts import render
 
 pee_diary_response = openapi.Response('OK', PeeDiarySerializer)
 pee_diary_list_response = openapi.Response('OK', PeeDiarySerializer(many=True))
@@ -44,12 +50,14 @@ def create_peeDiary(request):
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
     try:
+        user = request.user
         pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee)
+        enviarEmailValidacaoSucesso(user.email)
         return Response(serializer.data)
 
 
@@ -149,3 +157,32 @@ def delete_peeDiary(request, pk):
         else:
             data["response"] = "Delete unsuccesful"
         return Response(data=data)
+
+class Html(generics.RetrieveAPIView):
+    renderer_classes = [TemplateHTMLRenderer]
+
+    def get(*args, **kwargs):
+        return Response(template_name='emailConfirmation.html')
+
+
+def index(request):
+    return render(request, template_name='media/email/emailConfirmation.html')
+
+def enviarEmailValidacaoSucesso(email):
+    #plain_text = render_to_string('../email/emailConfirmation.txt')
+    #template_name = Html.get()
+    template_name = index('')
+    #email_path = render_to_string(index)
+    #new_path = settings.MEDIA_ROOT + email_path
+    #html_email = render_to_string('emailConfirmation.html')
+    email = 'arturladeira@id.uff.br'
+    send_mail(
+        'Um operador analisou seu sinistro de',
+        'Um operador analisou seu sinistro de txt',
+        #plain_text,
+        settings.EMAIL_HOST_USER,
+        [email],
+        fail_silently=False,
+        #html_message='Um operador analisou seu sinistro de html',
+        html_message=template_name,
+    )
