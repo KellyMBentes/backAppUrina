@@ -3,8 +3,8 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import LiquidIntakeSerializer,BeverageSerializer
-from .models import LiquidIntake,Beverage
+from .serializers import LiquidIntakeSerializer, BeverageSerializer
+from .models import LiquidIntake, Beverage
 import requests
 import json
 
@@ -12,13 +12,13 @@ liquid_intake_response = openapi.Response('OK', LiquidIntakeSerializer)
 
 
 @swagger_auto_schema(method='post', request_body=LiquidIntakeSerializer,
-    responses={
-        '201': 'Created',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-    })
+                     responses={
+                         '201': 'Created',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                     })
 @api_view(['POST', ])
-def create_liquidIntake(request,pk):
+def create_liquidIntake(request, pk):
     user = request.user
     beverage = Beverage(id=pk)
     liquidIntake = LiquidIntake(user=user, beverage=beverage)
@@ -31,12 +31,12 @@ def create_liquidIntake(request,pk):
 
 
 @swagger_auto_schema(method='get',
-    responses={
-        '200': liquid_intake_response,
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': liquid_intake_response,
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['GET', ])
 def read_liquidIntake(request, id):
     try:
@@ -45,19 +45,17 @@ def read_liquidIntake(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = LiquidIntakeSerializer(liquid)
-        r = requests.get('https://jsonplaceholder.typicode.com/users')
-        r = json.loads(r.content)
-        return Response(r)
+        serializer= LiquidIntakeSerializer(liquid)
+        return Response(serializer.data)
 
 
 @swagger_auto_schema(method='put', request_body=LiquidIntakeSerializer,
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['PUT', ])
 def update_liquidIntake(request, id):
     try:
@@ -76,12 +74,12 @@ def update_liquidIntake(request, id):
 
 
 @swagger_auto_schema(method='delete',
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['DELETE', ])
 def delete_liquidIntake(request, id):
     try:
@@ -99,18 +97,15 @@ def delete_liquidIntake(request, id):
         return Response(data=data)
 
 
-
 @swagger_auto_schema(method='post', request_body=BeverageSerializer,
-    responses={
-        '201': 'Created',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-    })
-
+                     responses={
+                         '201': 'Created',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                     })
 @api_view(['POST', ])
 def create_beverage(request):
-
-    beverage =Beverage()
+    beverage = Beverage()
     if request.method == 'POST':
         serializer = BeverageSerializer(beverage, data=request.data)
         if serializer.is_valid():
@@ -120,12 +115,12 @@ def create_beverage(request):
 
 
 @swagger_auto_schema(method='get',
-    responses={
-        '200': liquid_intake_response,
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': liquid_intake_response,
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['GET', ])
 def read_beverage(request, id):
     try:
@@ -139,12 +134,12 @@ def read_beverage(request, id):
 
 
 @swagger_auto_schema(method='put', request_body=BeverageSerializer,
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['PUT', ])
 def update_beverage(request, id):
     try:
@@ -163,12 +158,12 @@ def update_beverage(request, id):
 
 
 @swagger_auto_schema(method='delete',
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                         '404': 'Not Found',
+                     })
 @api_view(['DELETE', ])
 def delete_beverage(request, id):
     try:
