@@ -1,4 +1,11 @@
+from coreapi.compat import force_bytes
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail, EmailMessage
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, permissions
@@ -9,11 +16,13 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
+from users.tokens import account_activation_token
 from .serializers import RegistrationSerializer, MyAuthTokenSerializer
 from rest_framework.authtoken import views as auth_views
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
 from .serializers import MyAuthTokenSerializer, data1Register, dataLogin, ChangePasswordSerializer
+from appUrinaDjango import settings
 from .models import CustomUser
 from django.contrib.auth.models import User
 
@@ -83,21 +92,49 @@ serializerData2 = openapi.Response('OK', data1Register)
 @api_view(['POST', ])
 @permission_classes([AllowAny])
 def registration_view(request):
-
     if request.method == 'POST':
         serializer = RegistrationSerializer(data=request.data)
         data = {}
 
         if serializer.is_valid():
             user = serializer.save()
-            token = Token.objects.get(user=user).key
-            data['response'] = 'Succesfully registered a new user.'
+            user.is_active = False
+            user.save()
+            current_site = get_current_site(request)
+            mail_subject = 'Activate your blog account.'
+            message = render_to_string('acc_active_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            print(message)
+            to_email = user.email
+            email = EmailMessage(
+                mail_subject, message, to=[to_email]
+            )
+            email.send()
+            data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
-            data['token'] = token
 
         else:
             data = serializer.errors
         return Response(data=data)
+
+
+def activate(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64)
+        user = CustomUser.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        # return redirect('home')
+        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+    else:
+        return HttpResponse('Activation link is invalid!')
 
 
 #Endpoint para alteração de senha
@@ -132,3 +169,24 @@ class ChangePassword(APIView):
             return Response(data=data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def EmailChangePassword(user):
+    #plain_text = render_to_string('../email/emailConfirmation.txt')
+    #template_name = Html.get()
+    template_name = 'test.html'
+    #email_path = render_to_string(index)
+    #new_path = settings.MEDIA_ROOT + email_path
+    #html_email = render_to_string('emailConfirmation.html')
+    print(user.email)
+    email = user.email
+    send_mail(
+        'Um operador analisou seu sinistro de',
+        'Um operador analisou seu sinistro de txt',
+        #plain_text,
+        settings.EMAIL_HOST_USER,
+        [email],
+        fail_silently=False,
+        #html_message='Um operador analisou seu sinistro de html',
+        html_message=template_name,
+    )

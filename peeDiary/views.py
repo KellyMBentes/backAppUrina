@@ -57,7 +57,6 @@ def read_peeDiary(request, pk):
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee)
-        enviarEmailValidacaoSucesso(user.email)
         return Response(serializer.data)
 
 
@@ -158,31 +157,3 @@ def delete_peeDiary(request, pk):
             data["response"] = "Delete unsuccesful"
         return Response(data=data)
 
-class Html(generics.RetrieveAPIView):
-    renderer_classes = [TemplateHTMLRenderer]
-
-    def get(*args, **kwargs):
-        return Response(template_name='emailConfirmation.html')
-
-
-def index(request):
-    return render(request, template_name='media/email/emailConfirmation.html')
-
-def enviarEmailValidacaoSucesso(email):
-    #plain_text = render_to_string('../email/emailConfirmation.txt')
-    #template_name = Html.get()
-    template_name = index('')
-    #email_path = render_to_string(index)
-    #new_path = settings.MEDIA_ROOT + email_path
-    #html_email = render_to_string('emailConfirmation.html')
-    email = 'arturladeira@id.uff.br'
-    send_mail(
-        'Um operador analisou seu sinistro de',
-        'Um operador analisou seu sinistro de txt',
-        #plain_text,
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False,
-        #html_message='Um operador analisou seu sinistro de html',
-        html_message=template_name,
-    )
