@@ -7,7 +7,7 @@ class Beverage(models.Model):
 
 
 class LiquidIntake(models.Model):
+    beverage = models.ForeignKey(Beverage, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     createdDate = models.DateField(auto_now_add=True)
-    beverage = models.ArrayField(model_container=Beverage, null=True, blank=True)
     volume = models.FloatField(null=True, blank=True)
