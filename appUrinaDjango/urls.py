@@ -42,7 +42,7 @@ urlpatterns = [
     path('api/peeDiary/', include('peeDiary.urls', 'api_peeDiary')),
     path('api/question/', include('questions.urls', 'api_questions')),
     path('api/news/', include('news.urls', 'api_news')),
-
+    path('api/score/', include('score.urls', 'api_score'))
 
     # REST FRAMEWORK
     # path('api/', include('api.urls', 'api')),
