@@ -40,7 +40,9 @@ urlpatterns = [
     path('api/notification/', include('notifications.urls', 'api_notifications')),
     path('api/liquidIntake/', include('liquidIntake.urls', 'api_liquidIntake')),
     path('api/peeDiary/', include('peeDiary.urls', 'api_peeDiary')),
-    path('api/question/', include('questions.urls', 'api_questions'))
+    path('api/question/', include('questions.urls', 'api_questions')),
+    path('api/news/', include('news.urls', 'api_news')),
+
 
     # REST FRAMEWORK
     # path('api/', include('api.urls', 'api')),
