@@ -58,14 +58,6 @@ def get_score(request):
         return Response(serializer.data)
 
 
-@swagger_auto_schema(method='put', request_body=ScoreSerializer,
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['PUT', ])
 def update_score(user, expGain):
     success = False
 
