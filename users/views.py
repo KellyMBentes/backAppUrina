@@ -1,10 +1,12 @@
 from coreapi.compat import force_bytes
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail, EmailMessage
+from django.core import mail
+from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
+from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -83,6 +85,22 @@ decorated_login_view = \
 
 serializerData2 = openapi.Response('OK', data1Register)
 
+
+def SendEmail(request, user, subject, template):
+    current_site = get_current_site(request)
+    mail_subject = subject
+    from_email = settings.EMAIL_HOST_USER
+    html_content = render_to_string(template, {
+        'user': user,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    })
+    text_content = strip_tags(html_content)
+    to_email = user.email
+    mail.send_mail(mail_subject, text_content, from_email, [to_email], html_message=html_content, fail_silently=True)
+
+
 @swagger_auto_schema(method='post', request_body=RegistrationSerializer,
     responses={
         '200': serializerData2,
@@ -100,20 +118,7 @@ def registration_view(request):
             user = serializer.save()
             user.is_active = False
             user.save()
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your blog account.'
-            message = render_to_string('acc_active_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            print(message)
-            to_email = user.email
-            email = EmailMessage(
-                mail_subject, message, to=[to_email]
-            )
-            email.send()
+            SendEmail(request, user, 'Activate you account.', 'active_email.html')
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
 
@@ -121,8 +126,10 @@ def registration_view(request):
             data = serializer.errors
         return Response(data=data)
 
-
+@api_view(('GET',))
+@permission_classes([AllowAny])
 def activate(request, uidb64, token):
+    data = {}
     try:
         uid = urlsafe_base64_decode(uidb64)
         user = CustomUser.objects.get(pk=uid)
@@ -131,10 +138,11 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
-        # return redirect('home')
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        data['response'] = 'Succesfully activated user.'
+        data['email'] = user.email
     else:
-        return HttpResponse('Activation link is invalid!')
+        data['response'] = 'User activation failed.'
+    return Response(data=data)
 
 
 #Endpoint para alteração de senha
@@ -154,7 +162,7 @@ class ChangePassword(APIView):
         data = {}
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
-
+        data = {}
         if serializer.is_valid():
             # Check old password
             old_password = serializer.data.get("old_password")
@@ -165,28 +173,11 @@ class ChangePassword(APIView):
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
-            data['response'] = 'Password updated successfully'
+            user = request.user
+            SendEmail(request, user, 'Your password was changed.', 'change_password.html')
+            data['response'] = 'Password updated succesfully.'
             return Response(data=data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def EmailChangePassword(user):
-    #plain_text = render_to_string('../email/emailConfirmation.txt')
-    #template_name = Html.get()
-    template_name = 'test.html'
-    #email_path = render_to_string(index)
-    #new_path = settings.MEDIA_ROOT + email_path
-    #html_email = render_to_string('emailConfirmation.html')
-    print(user.email)
-    email = user.email
-    send_mail(
-        'Um operador analisou seu sinistro de',
-        'Um operador analisou seu sinistro de txt',
-        #plain_text,
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False,
-        #html_message='Um operador analisou seu sinistro de html',
-        html_message=template_name,
-    )
