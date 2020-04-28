@@ -3,10 +3,20 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ScoreSerializer
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Score
 import os
 
+score_response = openapi.Response('OK', ScoreSerializer)
 
+
+@swagger_auto_schema(method='post', request_body=ScoreSerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
 @api_view(['POST'])
 def create_score(request):
     user = request.user
@@ -26,6 +36,13 @@ def create_score(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get',
+    responses={
+        '200': score_response,
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
 @api_view(['GET'])
 def get_score(request):
     user = request.user
@@ -41,6 +58,14 @@ def get_score(request):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(method='put', request_body=ScoreSerializer,
+    responses={
+        '200': 'OK',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', ])
 def update_score(user, expGain):
     success = False
 
