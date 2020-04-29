@@ -122,7 +122,7 @@ def update_peeDiary(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "Update successful"
+            data["response"] = "Update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,7 +145,7 @@ def delete_peeDiary(request, pk):
         operation = pee.delete()
         data = {}
         if operation:
-            data["success"] = "Delete successful"
+            data["response"] = "Delete successful"
         else:
-            data["failure"] = "Delete unsuccesful"
+            data["response"] = "Delete unsuccesful"
         return Response(data=data)

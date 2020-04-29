@@ -106,7 +106,7 @@ def update_notification(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "update successful"
+            data["response"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -130,7 +130,7 @@ def update_option(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "update successful"
+            data["response"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,9 +153,9 @@ def delete_notification(request, pk):
         operation = notification.delete()
         data = {}
         if operation:
-            data["success"] = "delete successful"
+            data["response"] = "delete successful"
         else:
-            data["failure"] = "delete failed"
+            data["response"] = "delete failed"
         return Response(data=data)
 
 
@@ -177,7 +177,7 @@ def delete_option(request, pk):
         operation = option.delete()
         data = {}
         if operation:
-            data["success"] = "delete successful"
+            data["response"] = "delete successful"
         else:
-            data["failure"] = "delete failed"
+            data["response"] = "delete failed"
         return Response(data=data)

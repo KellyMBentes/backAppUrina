@@ -73,7 +73,7 @@ def update_questionForm(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "Update successful"
+            data["response"] = "Update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -96,9 +96,9 @@ def delete_questionForm(request, pk):
         operation = form.delete()
         data = {}
         if operation:
-            data["success"] = "Delete successful"
+            data["response"] = "Delete successful"
         else:
-            data["failure"] = "Delete unsuccesful"
+            data["response"] = "Delete unsuccesful"
         return Response(data=data)
 
 
@@ -159,7 +159,7 @@ def update_option(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "Update successful"
+            data["response"] = "Update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -181,7 +181,7 @@ def delete_option(request, pk):
         operation = option.delete()
         data = {}
         if operation:
-            data["success"] = "Delete successful"
+            data["response"] = "Delete successful"
         else:
-            data["failure"] = "Delete unsuccesful"
+            data["response"] = "Delete unsuccesful"
         return Response(data=data)

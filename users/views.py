@@ -95,12 +95,11 @@ def registration_view(request):
             data['token'] = token
         else:
             data = serializer.errors
-        return Response(data)
+        return Response(data=data)
 
 
 #Endpoint para alteração de senha
 class ChangePassword(APIView):
-    permission_classes = (permissions.IsAuthenticated, )
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -113,6 +112,7 @@ class ChangePassword(APIView):
                          })
     @action(detail=True, methods=['put'])
     def put(self, request, *args, **kwargs):
+        data = {}
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
 
@@ -120,17 +120,13 @@ class ChangePassword(APIView):
             # Check old password
             old_password = serializer.data.get("old_password")
             if not self.object.check_password(old_password):
-                response = {
-                    'failure': 'Wrong password'
-                }
-                return Response(response,
+                data['response'] = 'Wrong password'
+                return Response(data=data,
                                 status=status.HTTP_400_BAD_REQUEST)
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
-            response = {
-                'success': 'Password updated successfully',
-            }
-            return Response(response)
+            data['response'] = 'Password updated successfully'
+            return Response(data=data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

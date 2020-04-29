@@ -50,7 +50,7 @@ def update_personalData(request, id):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "Update successful"
+            data["response"] = "Update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,9 +92,9 @@ def delete_personalData(request, id):
         operation = personal.delete()
         data = {}
         if operation:
-            data["success"] = "Delete successful"
+            data["response"] = "Delete successful"
         else:
-            data["failure"] = "Delete unsuccesful"
+            data["response"] = "Delete unsuccesful"
         return Response(data=data)
 
 
@@ -158,7 +158,7 @@ def update_phone(request, id):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["success"] = "Update successful"
+            data["response"] = "Update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -181,9 +181,9 @@ def delete_phone(request, id):
         operation = phone.delete()
         data = {}
         if operation:
-            data["success"] = "Delete successful"
+            data["response"] = "Delete successful"
         else:
-            data["failure"] = "Delete unsuccesful"
+            data["response"] = "Delete unsuccesful"
         return Response(data=data)
 
 
