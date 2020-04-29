@@ -2,13 +2,55 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <style type="text/css">
+        *{
+            font-family: "Segoe UI";
+            font-weight: 200;
+        }
+        h1 {
+            color: #662D91;
+            font-weight: 400;
+        }
+        h2{
+            color: white;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+        p{
+            color: gray;
+            font-size: 17px;
+            margin-top: 0px;
+        }
+        .header{
+            background-color: #662D91;
+            text-align: left;
+            width: 100%;
+            margin-bottom: -20px;
+            height: 100px;
+            padding-top: 10px;
+        }
+        .body{
+            background-color: #E2E2E3;
+            text-align: center;
+            width: 100%;
+            margin-top: 0px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        </style>
     </head>
     <body>
-    <div style="background-color: lightgrey; text-align: center; border-radius: 20px; width: 100%">
+    <div class="header">
+        <h2>PLETHORA</h2>
+    </div>
+    <div class="body">
         {% autoescape off %}
-        Hi <strong>{{ user.email }}</strong>,<br>
-        Please click on the link to confirm your registration,<br>
-        <a href="http://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}">http://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}</a>
+        <h1>Hi {{ user.email }},<br></h1>
+        <p>Please click on the link to confirm your registration,<br>
+        <a href="http://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}">http://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}</a><br>
+        Thanks, Team Plethora.
+        </p>
         {% endautoescape %}
     </div>
     </body>

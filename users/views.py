@@ -85,22 +85,6 @@ decorated_login_view = \
 
 serializerData2 = openapi.Response('OK', data1Register)
 
-
-def SendEmail(request, user, subject, template):
-    current_site = get_current_site(request)
-    mail_subject = subject
-    from_email = settings.EMAIL_HOST_USER
-    html_content = render_to_string(template, {
-        'user': user,
-        'domain': current_site.domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': account_activation_token.make_token(user),
-    })
-    text_content = strip_tags(html_content)
-    to_email = user.email
-    mail.send_mail(mail_subject, text_content, from_email, [to_email], html_message=html_content, fail_silently=True)
-
-
 @swagger_auto_schema(method='post', request_body=RegistrationSerializer,
     responses={
         '200': serializerData2,
@@ -118,7 +102,7 @@ def registration_view(request):
             user = serializer.save()
             user.is_active = False
             user.save()
-            SendEmail(request, user, 'Activate you account.', 'active_email.html')
+            SendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html')
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
 
@@ -126,6 +110,8 @@ def registration_view(request):
             data = serializer.errors
         return Response(data=data)
 
+
+# Função para realizar a ativação do usuário após clicar no link com uid e token, fornecido por email
 @api_view(('GET',))
 @permission_classes([AllowAny])
 def activate(request, uidb64, token):
@@ -145,7 +131,23 @@ def activate(request, uidb64, token):
     return Response(data=data)
 
 
-#Endpoint para alteração de senha
+# Função que recebe alguns parâmetros e os repassa para o envio de um email
+def SendEmail(request, user, subject, template):
+    current_site = get_current_site(request)
+    mail_subject = subject
+    from_email = settings.EMAIL_HOST_USER
+    html_content = render_to_string(template, {
+        'user': user,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    })
+    text_content = strip_tags(html_content)
+    to_email = user.email
+    mail.send_mail(mail_subject, text_content, from_email, [to_email], html_message=html_content, fail_silently=True)
+
+
+# Endpoint para alteração de senha do usuário logado
 class ChangePassword(APIView):
 
     def get_object(self, queryset=None):
@@ -164,13 +166,13 @@ class ChangePassword(APIView):
         serializer = ChangePasswordSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            # Check old password
+            # Checa a senha antiga
             old_password = serializer.data.get("old_password")
             if not self.object.check_password(old_password):
                 data['response'] = 'Wrong password'
                 return Response(data=data,
                                 status=status.HTTP_400_BAD_REQUEST)
-            # set_password also hashes the password that the user will get
+            # Seta a nova senha fornecida pelo usuário
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
             user = request.user
