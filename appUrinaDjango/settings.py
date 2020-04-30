@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'peeDiary',
     'liquidIntake',
     'score',
+    'chat'
 ]
 
 REST_FRAMEWORK = {
