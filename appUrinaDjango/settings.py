@@ -103,10 +103,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'appUrinaDjango.wsgi.application'
 
 
+DATABASE_CONNECTION_POOLING = False
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'appUrina',
+        'NAME': 'Urina_DB',
+        'ENGINE': 'sql_server.pyodbc',
+        'HOST': 'urina.database.windows.net',
+        'USER': 'adm',
+        'PASSWORD': '@Senha123',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
 
