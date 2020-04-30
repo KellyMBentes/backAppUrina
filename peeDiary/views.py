@@ -47,6 +47,8 @@ def create_peeDiary(request):
     })
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
+    user= request.user
+    print(user.id)
     try:
         user = request.user
         pee = PeeDiary.objects.get(id=pk)
