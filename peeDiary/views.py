@@ -79,16 +79,28 @@ def list_peeDiary(request):
         if offset is not None and limit is not None and peeVolume is not None:
             offset = int(offset)
             limit = int(limit)
-            peeVolume = float(peeVolume)
-            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[offset:limit]
+            if offset >= limit:
+                data['error'] = "offset param must be less than limit param."
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                peeVolume = float(peeVolume)
+                pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[offset:limit]
         elif offset is not None and limit is not None:
             offset = int(offset)
             limit = int(limit)
-            pee = PeeDiary.objects.filter(user=user)[offset:limit]
+            if offset >= limit:
+                data['error'] = "offset param must be less than limit param."
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                pee = PeeDiary.objects.filter(user=user)[offset:limit]
         elif offset is None and limit is not None and peeVolume is not None:
             limit = int(limit)
             peeVolume = float(peeVolume)
-            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[:limit]
+            if offset >= limit:
+                data['error'] = "offset param must be less than limit param."
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[:limit]
         elif offset is None and limit is None and peeVolume is not None:
             peeVolume = float(peeVolume)
             pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)
@@ -107,7 +119,11 @@ def list_peeDiary(request):
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee, many=True)
-        return Response(serializer.data)
+        if serializer.data.__len__() == 0:
+            data["error"] = "could not retrieve any peeDiary"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.data)
 
 
 @swagger_auto_schema(method='put', request_body=PeeDiarySerializer,
