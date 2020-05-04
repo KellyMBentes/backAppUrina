@@ -133,12 +133,11 @@ def activate(request, uidb64, token):
 
 # Função que recebe alguns parâmetros e os repassa para o envio de um email
 def SendEmail(request, user, subject, template):
-    current_site = get_current_site(request)
     mail_subject = subject
     from_email = settings.EMAIL_HOST_USER
     html_content = render_to_string(template, {
         'user': user,
-        'domain': current_site.domain,
+        'domain': request.get_host(),
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
     })
