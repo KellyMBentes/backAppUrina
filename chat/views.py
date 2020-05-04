@@ -52,7 +52,7 @@ def message_list(request, receiver=None):
         if request.method == 'GET':
             serializer = MessageSerializer(content, many=True, context={'request': request})
             if serializer.data.__len__() == 0:
-                data["end"] = "don't have new messages yet"
+                data["error"] = "could not retrieve any message"
                 return JsonResponse(data=data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return JsonResponse(serializer.data, safe=False)
