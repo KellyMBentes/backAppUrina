@@ -58,7 +58,7 @@ def get_score(request):
         return Response(serializer.data)
 
 
-def update_score(user, expGain):
+def update_score(user, expGain, multiplier=1):
     success = False
 
     try:
@@ -73,7 +73,10 @@ def update_score(user, expGain):
         lines.append(line)
     file.close()
 
-    score.exp += expGain
+    if multiplier > 3:
+        multiplier = 3
+
+    score.exp += expGain*multiplier
 
     if (0 < score.level < 6) and len(lines) != 0:
         line = lines[score.level].split()

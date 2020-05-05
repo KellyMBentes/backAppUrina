@@ -6,11 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from .serializers import PeeDiarySerializer
 from .models import PeeDiary
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.shortcuts import get_object_or_404
-from appUrinaDjango import settings
-from django.shortcuts import render
+from score.views import update_score
+from datetime import datetime, timezone, timedelta
 
 pee_diary_response = openapi.Response('OK', PeeDiarySerializer)
 pee_diary_list_response = openapi.Response('OK', PeeDiarySerializer(many=True))
@@ -36,6 +33,7 @@ def create_peeDiary(request):
         serializer = PeeDiarySerializer(peeDiary, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            valid_score(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -156,4 +154,45 @@ def delete_peeDiary(request, pk):
         else:
             data["response"] = "Delete unsuccesful"
         return Response(data=data)
+
+
+def valid_score(user):
+    success = False
+    today = datetime.now(timezone.utc)
+    limitDate = today - timedelta(days=3)
+    print(today)
+    print(limitDate)
+
+    try:
+        peeList = PeeDiary.objects.filter(user=user, createdDate__gte=limitDate.date()).order_by('-createdDate')
+    except PeeDiary.DoesNotExist:
+        return success
+
+    size = len(peeList)
+    if size > 0:
+        consecutivePee = 0
+        consecutiveDays = 0
+        print(peeList)
+        print('size: ', size)
+        print("###################")
+        breakDays = False
+        for i in range(0, size-1):
+            deltaTime = peeList[i].createdDate.date() - peeList[i + 1].createdDate.date()
+            passedTime = today.date() - peeList[i].createdDate.date()
+            print(peeList[i], ' - ', peeList[i+1])
+            print('delta: ', deltaTime.days)
+            print('passed: ', passedTime.days)
+            if passedTime.days == 0:
+                consecutivePee += 1
+            if deltaTime.days == 1 and not breakDays:
+                consecutiveDays += 1
+            if deltaTime.days > 1:
+                breakDays = True
+        print("###################")
+        print('consecutivePee: ', consecutivePee)
+        print('consecutiveDays: ', consecutiveDays)
+        success = True
+        update_score(user, 5, consecutivePee)
+        update_score(user, 10, consecutiveDays)
+    return success
 
