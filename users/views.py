@@ -1,4 +1,6 @@
 from coreapi.compat import force_bytes
+from django.urls import reverse
+from django_rest_passwordreset.signals import reset_password_token_created
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
 from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
@@ -18,12 +20,12 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
-from users.tokens import account_activation_token
+from .tokens import account_activation_token
 from .serializers import RegistrationSerializer, MyAuthTokenSerializer
 from rest_framework.authtoken import views as auth_views
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
-from .serializers import MyAuthTokenSerializer, data1Register, dataLogin, ChangePasswordSerializer
+from .serializers import MyAuthTokenSerializer, data1Register, dataLogin, ChangePasswordSerializer, ChangePasswordSerializer2
 from appUrinaDjango import settings
 from .models import CustomUser
 from django.contrib.auth.models import User
@@ -102,7 +104,7 @@ def registration_view(request):
             user = serializer.save()
             user.is_active = False
             user.save()
-            SendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html')
+            sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html')
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
 
@@ -132,7 +134,7 @@ def activate(request, uidb64, token):
 
 
 # Função que recebe alguns parâmetros e os repassa para o envio de um email
-def SendEmail(request, user, subject, template):
+def sendEmail(request, user, subject, template):
     mail_subject = subject
     from_email = settings.EMAIL_HOST_USER
     html_content = render_to_string(template, {
@@ -175,10 +177,51 @@ class ChangePassword(APIView):
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
             user = request.user
-            SendEmail(request, user, 'Your password was changed.', 'change_password.html')
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html')
             data['response'] = 'Password updated succesfully.'
             return Response(data=data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(('GET',))
+@permission_classes([AllowAny])
+def passwordReset(request, email):
+    data = {}
+    try:
+        user = CustomUser.objects.get(email=email)
+    except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+    print(user, user.id)
+    if user is not None:
+        sendEmail(request, user, 'Reset your password.', 'user_reset_password.html')
+        data['response'] = 'A email of reset was sent.'
+    else:
+        data['response'] = 'Unidentify email.'
+    return Response(data=data)
+
+
+@api_view(('PUT',))
+@permission_classes([AllowAny])
+def changePasswordReset(request, uidb64, token):
+    data = {}
+    try:
+        uid = urlsafe_base64_decode(uidb64)
+        user = CustomUser.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+    print("CHANGE PASSWORD RESET", user)
+    if user is not None and account_activation_token.check_token(user, token):
+        serializer = ChangePasswordSerializer2(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html')
+            data['response'] = 'Password updated succesfully.'
+            return Response(data=data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        data['response'] = 'User activation failed.'
+        return Response(data=data)

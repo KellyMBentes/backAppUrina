@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'liquidIntake',
     'score',
     'chat'
+    'django_rest_passwordreset',
 ]
 
 REST_FRAMEWORK = {
