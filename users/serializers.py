@@ -1,4 +1,7 @@
+
+
 from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
@@ -36,29 +39,36 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 # Serializa e valida o email e senha, e se ok gera um token
 class MyAuthTokenSerializer(serializers.Serializer):
-    email = serializers.EmailField(label=_("Email"))
-    password = serializers.CharField(
-        label=_("Password",),
-        style={'input_type': 'password'},
-        trim_whitespace=False
-    )
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'})
 
-    def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
 
         if email and password:
-            user = authenticate(request=self.context.get('request'),
-                                email=email, password=password)
-            if not user:
-                msg = _('Unable to log in with provided credentials.')
-                raise serializers.ValidationError(msg, code='authorization')
+            user = authenticate(email=email, password=password)
+            if user:
+                if not user.is_active:
+                    msg = _('User account is disabled.')
+                    raise exceptions.ValidationError(msg)
+            else:
+                try:
+                    user = CustomUser.objects.get(email=email)
+                except:
+                    user = None
+                if user is not None:
+                    if not user.is_active:
+                        msg = _('User account is disabled.')
+                else:
+                    msg = _('Unable to log in with provided credentials.')
+                raise exceptions.ValidationError(msg)
         else:
             msg = _('Must include "email" and "password".')
-            raise serializers.ValidationError(msg, code='authorization')
+            raise exceptions.ValidationError(msg)
 
-        attrs['user'] = user
-        return attrs
+        data['user'] = user
+        return data
 
 
 #Cria um model para ser mostrado no swagger como formato da resposta para o POST de registro
