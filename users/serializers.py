@@ -102,7 +102,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class ChangePasswordSerializer2(serializers.Serializer):
-    new_password = serializers.CharField(required=True)
+
 
     def validate_new_password(self, value):
         validate_password(value)

@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'score',
     'chat'
     'django_rest_passwordreset',
+    "allauth"
+
 ]
 
 REST_FRAMEWORK = {

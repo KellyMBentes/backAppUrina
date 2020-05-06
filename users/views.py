@@ -1,3 +1,6 @@
+import random
+import string
+
 from coreapi.compat import force_bytes
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
@@ -25,20 +28,19 @@ from .serializers import RegistrationSerializer, MyAuthTokenSerializer
 from rest_framework.authtoken import views as auth_views
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
-from .serializers import MyAuthTokenSerializer, data1Register, dataLogin, ChangePasswordSerializer, ChangePasswordSerializer2
+from .serializers import MyAuthTokenSerializer, data1Register, dataLogin, ChangePasswordSerializer, \
+    ChangePasswordSerializer2
 from appUrinaDjango import settings
 from .models import CustomUser
 from django.contrib.auth.models import User
 
 
-
 #########################################
-#Visualização da serialização do login
+# Visualização da serialização do login
 
-#Obtem o token no momento do login passando o email e a senha
+# Obtem o token no momento do login passando o email e a senha
 @permission_classes([AllowAny])
 class MyAuthToken(auth_views.ObtainAuthToken):
-
     serializer_class = MyAuthTokenSerializer
     if coreapi is not None and coreschema is not None:
         schema = ManualSchema(
@@ -71,28 +73,28 @@ obtain_auth_token = MyAuthToken.as_view()
 serializerData = openapi.Response('OK', dataLogin)
 
 decorated_login_view = \
-   swagger_auto_schema(
-       method='post', request_body=MyAuthTokenSerializer,
-       responses={
-           '200': serializerData,
-           '201': 'Created',
-           '400': 'Bad Request',
-           '401': 'Unauthorized',
-       }
-   )(obtain_auth_token)
-
+    swagger_auto_schema(
+        method='post', request_body=MyAuthTokenSerializer,
+        responses={
+            '200': serializerData,
+            '201': 'Created',
+            '400': 'Bad Request',
+            '401': 'Unauthorized',
+        }
+    )(obtain_auth_token)
 
 #########################################
-#Visualização da serialização do registro
+# Visualização da serialização do registro
 
 serializerData2 = openapi.Response('OK', data1Register)
 
+
 @swagger_auto_schema(method='post', request_body=RegistrationSerializer,
-    responses={
-        '200': serializerData2,
-        '201': 'Created',
-        '400': 'Bad Request',
-    })
+                     responses={
+                         '200': serializerData2,
+                         '201': 'Created',
+                         '400': 'Bad Request',
+                     })
 @api_view(['POST', ])
 @permission_classes([AllowAny])
 def registration_view(request):
@@ -134,7 +136,8 @@ def activate(request, uidb64, token):
 
 
 # Função que recebe alguns parâmetros e os repassa para o envio de um email
-def sendEmail(request, user, subject, template):
+def sendEmail(request, user, subject, template, *args):
+
     mail_subject = subject
     from_email = settings.EMAIL_HOST_USER
     html_content = render_to_string(template, {
@@ -142,6 +145,7 @@ def sendEmail(request, user, subject, template):
         'domain': request.get_host(),
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
+        "password": args[0]
     })
     text_content = strip_tags(html_content)
     to_email = user.email
@@ -184,6 +188,11 @@ class ChangePassword(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+def randomString(stringLength=8):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+
 @api_view(('GET',))
 @permission_classes([AllowAny])
 def passwordReset(request, email):
@@ -194,13 +203,23 @@ def passwordReset(request, email):
         user = None
     print(user, user.id)
     if user is not None:
-        sendEmail(request, user, 'Reset your password.', 'user_reset_password.html')
-        data['response'] = 'A email of reset was sent.'
+            password = randomString()
+            print(password)
+            user.set_password(password)
+            user.save()
+            print(user.check_password(password))
+            sendEmail(request, user, 'Reset your password.', 'user_reset_password.html', password)
+            data['response'] = 'A email of reset was sent.'
     else:
         data['response'] = 'Unidentify email.'
     return Response(data=data)
 
-
+@swagger_auto_schema(method='put', request_body=ChangePasswordSerializer,
+                         responses={
+                             '200': 'OK',
+                             '400': 'Bad Request',
+                             '401': 'Unauthorized',
+                         })
 @api_view(('PUT',))
 @permission_classes([AllowAny])
 def changePasswordReset(request, uidb64, token):
@@ -208,20 +227,23 @@ def changePasswordReset(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64)
         user = CustomUser.objects.get(pk=uid)
+        print(user)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     print("CHANGE PASSWORD RESET", user)
     if user is not None and account_activation_token.check_token(user, token):
-        serializer = ChangePasswordSerializer2(data=request.data)
-        data = {}
-        if serializer.is_valid():
-            user.set_password(serializer.data.get("new_password"))
+            # Checa a senha antiga
+        old_password = request.data.get("old_password")
+        if not user.check_password(old_password):
+            data['response'] = 'Wrong password'
+            return Response(data=data,
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+        # Seta a nova senha fornecida pelo usuário
+            user.set_password(request.data.get("new_password"))
             user.save()
-            sendEmail(request, user, 'Your password was changed.', 'change_password.html')
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html',0)
             data['response'] = 'Password updated succesfully.'
             return Response(data=data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        data['response'] = 'User activation failed.'
-        return Response(data=data)
+
+    return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
