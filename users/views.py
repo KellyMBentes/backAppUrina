@@ -106,7 +106,7 @@ def registration_view(request):
             user = serializer.save()
             user.is_active = False
             user.save()
-            sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html')
+            sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html',0)
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
 
@@ -181,7 +181,7 @@ class ChangePassword(APIView):
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
             user = request.user
-            sendEmail(request, user, 'Your password was changed.', 'change_password.html')
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html',0)
             data['response'] = 'Password updated succesfully.'
             return Response(data=data)
 
