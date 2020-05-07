@@ -167,6 +167,7 @@ class ChangePassword(APIView):
     @action(detail=True, methods=['put'])
     def put(self, request, *args, **kwargs):
         data = {}
+        print(request.user)
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         data = {}
@@ -181,7 +182,7 @@ class ChangePassword(APIView):
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
             user = request.user
-            sendEmail(request, user, 'Your password was changed.', 'change_password.html',0)
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html', 0)
             data['response'] = 'Password updated succesfully.'
             return Response(data=data)
 
@@ -230,7 +231,6 @@ def changePasswordReset(request, uidb64, token):
         print(user)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
-    print("CHANGE PASSWORD RESET", user)
     if user is not None and account_activation_token.check_token(user, token):
             # Checa a senha antiga
         old_password = request.data.get("old_password")

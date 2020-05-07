@@ -110,6 +110,9 @@ TEMPLATES = [
 SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = (
+    # default
+    'django.contrib.auth.backends.ModelBackend',
+    # email login
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
