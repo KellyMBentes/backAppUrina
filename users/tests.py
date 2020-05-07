@@ -7,7 +7,7 @@ from .models import CustomUser
 class AccountTests(APITestCase):
     def test_create_account(self):
         """
-        Ensure we can create a new account object.
+        Ensure we can create a new account object.py
         """
         url = "http://127.0.0.1:8000/api/user/register"
         data = {'email': 'name@gmail.com','password':'123','confirm_password':'123'}

@@ -54,9 +54,9 @@ INSTALLED_APPS = [
     'peeDiary',
     'liquidIntake',
     'score',
-    'chat'
+    'chat',
     'django_rest_passwordreset',
-    "allauth"
+    "allauth",
 
 ]
 
