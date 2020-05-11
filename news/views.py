@@ -29,7 +29,7 @@ def read_news(request):
             return Response(content)
 
         except JSONDecodeError:
-            data['error'] = "404 - File or directory not found."
+            data['error'] = "File or directory not found."
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
 

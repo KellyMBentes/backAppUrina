@@ -41,7 +41,7 @@ def read_liquidIntake(request, id):
     try:
         liquid = LiquidIntake.objects.get(id=id)
     except LiquidIntake.DoesNotExist:
-        data['errors'] = "Object Not Found"
+        data['error'] = "Object not found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -51,7 +51,6 @@ def read_liquidIntake(request, id):
 
 @swagger_auto_schema(method='put', request_body=LiquidIntakeSerializer,
     responses={
-        '200': 'OK',
         '202': 'Accepted',
         '400': 'Bad Request',
         '401': 'Unauthorized',

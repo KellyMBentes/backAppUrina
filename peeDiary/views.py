@@ -25,13 +25,11 @@ peeVolume = openapi.Parameter('peeVolume', in_=openapi.IN_QUERY, type=openapi.TY
     })
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
-    user = request.user
     data = {}
     try:
-        user = request.user
         pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
-        data['errors'] = "Object Not Found"
+        data['error'] = "Object not found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -43,6 +41,7 @@ def read_peeDiary(request, pk):
     manual_parameters=[offset, limit, peeVolume],
     responses={
         '200': pee_diary_list_response,
+        '204': 'No content',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
@@ -106,14 +105,14 @@ def create_list_peeDiary(request):
         else:
             pee = PeeDiary.objects.filter(user=user)
     except PeeDiary.DoesNotExist:
-        data['errors'] = "Object Not Found"
+        data['error'] = "Object not nound"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee, many=True)
         if serializer.data.__len__() == 0:
-            data["error"] = "could not retrieve any peeDiary"
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            data["error"] = "Could not retrieve any peeDiary"
+            return Response(data=data, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.data)
 
@@ -137,7 +136,7 @@ def update_delete_peeDiary(request, pk):
     try:
         pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
-        data['errors'] = "Object Not Found"
+        data['error'] = "Object Not Found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
