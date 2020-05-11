@@ -12,7 +12,6 @@ from django.views.decorators.csrf import csrf_exempt
 chat_response = openapi.Response('OK', MessageSerializer)
 
 
-# Create your views here.
 @swagger_auto_schema(method='get', responses={
         '200': chat_response,
         '400': 'Bad Request',

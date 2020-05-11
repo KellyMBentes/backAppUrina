@@ -1,9 +1,8 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, generics
-from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view
 from .serializers import PeeDiarySerializer
 from .models import PeeDiary
 from score.views import update_score
@@ -17,27 +16,6 @@ limit = openapi.Parameter('limit', in_=openapi.IN_QUERY, type=openapi.TYPE_STRIN
 peeVolume = openapi.Parameter('peeVolume', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
 
 
-@swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
-    responses={
-        '201': 'Created',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-    })
-@api_view(['POST', ])
-def create_peeDiary(request):
-    user = request.user
-
-    peeDiary = PeeDiary(user=user)
-
-    if request.method == 'POST':
-        serializer = PeeDiarySerializer(peeDiary, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            valid_score(user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
-
-
 @swagger_auto_schema(method='get',
     responses={
         '200': pee_diary_response,
@@ -47,13 +25,14 @@ def create_peeDiary(request):
     })
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
-    user= request.user
-    print(user.id)
+    user = request.user
+    data = {}
     try:
         user = request.user
         pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['errors'] = "Object Not Found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee)
@@ -68,11 +47,27 @@ def read_peeDiary(request, pk):
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['GET', ])
-def list_peeDiary(request):
+@swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
+@api_view(['GET', 'POST'])
+def create_list_peeDiary(request):
+    user = request.user
+    peeDiary = PeeDiary(user=user)
+
+    if request.method == 'POST':
+        serializer = PeeDiarySerializer(peeDiary, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            valid_score(user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+    data = {}
     try:
-        user = request.user
-        data = {}
         offset = request.query_params.get('offset', None)
         limit = request.query_params.get('limit', None)
         peeVolume = request.query_params.get('peeVolume', None)
@@ -96,11 +91,7 @@ def list_peeDiary(request):
         elif offset is None and limit is not None and peeVolume is not None:
             limit = int(limit)
             peeVolume = float(peeVolume)
-            if offset >= limit:
-                data['error'] = "offset param must be less than limit param."
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[:limit]
+            pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)[:limit]
         elif offset is None and limit is None and peeVolume is not None:
             peeVolume = float(peeVolume)
             pee = PeeDiary.objects.filter(user=user, peeVolume=peeVolume)
@@ -115,7 +106,8 @@ def list_peeDiary(request):
         else:
             pee = PeeDiary.objects.filter(user=user)
     except PeeDiary.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['errors'] = "Object Not Found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee, many=True)
@@ -128,17 +120,25 @@ def list_peeDiary(request):
 
 @swagger_auto_schema(method='put', request_body=PeeDiarySerializer,
     responses={
-        '200': 'OK',
+        '202': 'Accepted',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['PUT', ])
-def update_peeDiary(request, pk):
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'OK',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', 'DELETE'])
+def update_delete_peeDiary(request, pk):
+    data = {}
     try:
         pee = PeeDiary.objects.get(id=pk)
     except PeeDiary.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['errors'] = "Object Not Found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
         serializer = PeeDiarySerializer(pee, data=request.data)
@@ -146,25 +146,9 @@ def update_peeDiary(request, pk):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
-            return Response(data=data)
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@swagger_auto_schema(method='delete',
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['DELETE', ])
-def delete_peeDiary(request, pk):
-    try:
-        pee = PeeDiary.objects.get(id=pk)
-    except PeeDiary.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         operation = pee.delete()
         data = {}
         if operation:
@@ -178,8 +162,6 @@ def valid_score(user):
     success = False
     today = datetime.now(timezone.utc)
     limitDate = today - timedelta(days=3)
-    print(today)
-    print(limitDate)
 
     try:
         peeList = PeeDiary.objects.filter(user=user, createdDate__gte=limitDate.date()).order_by('-createdDate')
@@ -190,25 +172,17 @@ def valid_score(user):
     if size > 0:
         consecutivePee = 0
         consecutiveDays = 0
-        print(peeList)
-        print('size: ', size)
-        print("###################")
         breakDays = False
         for i in range(0, size-1):
             deltaTime = peeList[i].createdDate.date() - peeList[i + 1].createdDate.date()
             passedTime = today.date() - peeList[i].createdDate.date()
-            print(peeList[i], ' - ', peeList[i+1])
-            print('delta: ', deltaTime.days)
-            print('passed: ', passedTime.days)
             if passedTime.days == 0:
                 consecutivePee += 1
             if deltaTime.days == 1 and not breakDays:
                 consecutiveDays += 1
             if deltaTime.days > 1:
                 breakDays = True
-        print("###################")
-        print('consecutivePee: ', consecutivePee)
-        print('consecutiveDays: ', consecutiveDays)
+
         success = True
         update_score(user, 5, consecutivePee)
         update_score(user, 10, consecutiveDays)

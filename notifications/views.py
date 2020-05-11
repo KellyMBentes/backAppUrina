@@ -94,8 +94,14 @@ def create_option(request, pk):
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['PUT', ])
-def update_notification(request, pk):
+@swagger_auto_schema(method='delete', request_body=NotificationSerializer,
+    responses={
+        '200': 'OK',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', 'DELETE'])
+def update_delete_notification(request, pk):
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
@@ -109,6 +115,14 @@ def update_notification(request, pk):
             data["response"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        operation = notification.delete()
+        data = {}
+        if operation:
+            data["response"] = "delete successful"
+        else:
+            data["response"] = "delete failed"
+        return Response(data=data)
 
 
 @swagger_auto_schema(method='put', request_body=OptionSerializer,
@@ -118,8 +132,14 @@ def update_notification(request, pk):
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['PUT', ])
-def update_option(request, pk):
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'OK',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', 'DELETE'])
+def update_delete_option(request, pk):
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
@@ -133,47 +153,7 @@ def update_option(request, pk):
             data["response"] = "update successful"
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@swagger_auto_schema(method='delete',
-    responses={
-        '200': 'Success',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['DELETE', ])
-def delete_notification(request, pk):
-    try:
-        notification = Notification.objects.get(id=pk)
-    except Notification.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'DELETE':
-        operation = notification.delete()
-        data = {}
-        if operation:
-            data["response"] = "delete successful"
-        else:
-            data["response"] = "delete failed"
-        return Response(data=data)
-
-
-@swagger_auto_schema(method='delete',
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['DELETE', ])
-def delete_option(request, pk):
-    try:
-        option = Option.objects.get(id=pk)
-    except Option.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         operation = option.delete()
         data = {}
         if operation:
