@@ -5,6 +5,6 @@ from score import views
 app_name = 'score'
 
 urlpatterns = [
-    path('', views.get_score, name="detail"),
-    path('create', views.create_score, name="create"),
+    path('', views.create_score, name="create"),
+    path('<int:pk>', views.get_score, name="detail"),
 ]

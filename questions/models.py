@@ -10,5 +10,5 @@ class QuestionForm(models.Model):
 
 
 class Option(models.Model):
-    formId = models.ForeignKey(QuestionForm, on_delete=models.CASCADE)
+    form = models.ForeignKey(QuestionForm, on_delete=models.CASCADE)
     text = models.CharField(max_length=55, null=True, blank=True)

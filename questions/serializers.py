@@ -3,11 +3,11 @@ from .models import QuestionForm, Option
 
 
 class QuestionOptionSerializer(serializers.ModelSerializer):
-    formId = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    form = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
     class Meta:
         model = Option
-        fields = ['id', 'formId', 'text']
+        fields = ['id', 'form', 'text']
 
 
 class QuestionFormSerializer(serializers.ModelSerializer):

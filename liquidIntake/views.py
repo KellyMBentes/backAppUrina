@@ -83,5 +83,5 @@ def update_delete_liquidIntake(request, id):
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccesful"
+            data["response"] = "Delete failed"
         return Response(data=data)

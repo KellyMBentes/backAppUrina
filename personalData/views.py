@@ -21,37 +21,19 @@ phone_response = openapi.Response('OK', PhoneSerializer)
 @api_view(['POST', ])
 def create_personalData(request):
     user = request.user
+    data = {}
+    try:
+        personal = PersonalData.objects.get(user=user)
+        data['error'] = "Duplicate key error collection: user can't have more than one personal data"
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+    except PersonalData.DoesNotExist:
+        personal = PersonalData(user=user)
 
-    personal = PersonalData(user=user)
     if request.method == 'POST':
         serializer = PersonalDataSerializer(personal, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@swagger_auto_schema(method='put', request_body=PersonalDataSerializer,
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['PUT', ])
-def update_personalData(request, id):
-    try:
-        personal = PersonalData.objects.get(id=id)
-    except PersonalData.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'PUT':
-        serializer = PersonalDataSerializer(personal, data=request.data)
-        data = {}
-        if serializer.is_valid():
-            serializer.save()
-            data["response"] = "Update successful"
-            return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -64,37 +46,56 @@ def update_personalData(request, id):
     })
 @api_view(['GET', ])
 def read_personalData(request, id):
+    data = {}
     try:
         personal = PersonalData.objects.get(id=id)
     except PersonalData.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object not fount"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PersonalDataSerializer(personal)
         return Response(serializer.data)
 
 
-@swagger_auto_schema(method='delete',
+
+@swagger_auto_schema(method='put', request_body=PersonalDataSerializer,
     responses={
-        '200': 'OK',
+        '202': 'Accepted',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['DELETE', ])
-def delete_personalData(request, id):
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'OK',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', 'DELETE'])
+def update_delete_personalData(request, id):
+    data = {}
     try:
         personal = PersonalData.objects.get(id=id)
     except PersonalData.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object not fount"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'DELETE':
+    if request.method == 'PUT':
+        serializer = PersonalDataSerializer(personal, data=request.data)
+        data = {}
+        if serializer.is_valid():
+            serializer.save()
+            data["response"] = "Update successful"
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
         operation = personal.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccesful"
+            data["response"] = "Delete failed"
         return Response(data=data)
 
 
@@ -106,18 +107,22 @@ def delete_personalData(request, id):
     })
 @api_view(['POST', ])
 def create_phone(request, id):
-    personal = PersonalData.objects.get(id=id)
+    data = {}
+    try:
+        personal = PersonalData.objects.get(id=id)
+    except PersonalData.DoesNotExist:
+        data['error'] = "Object not found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
     phone = Phone(personalData=personal)
 
     if request.method == 'POST':
         serializer = PhoneSerializer(phone, data=request.data)
         if serializer.is_valid():
-            print(personal)
             serializer.save()
             personal.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @swagger_auto_schema(method='get',
@@ -129,10 +134,12 @@ def create_phone(request, id):
     })
 @api_view(['GET', ])
 def read_phone(request, id):
+    data = {}
     try:
         phone = Phone.objects.get(id=id)
     except Phone.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object not found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PhoneSerializer(phone)
@@ -141,17 +148,25 @@ def read_phone(request, id):
 
 @swagger_auto_schema(method='put', request_body=PhoneSerializer,
     responses={
-        '200': 'OK',
+        '202': 'Accepted',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
-@api_view(['PUT', ])
-def update_phone(request, id):
+@swagger_auto_schema(method='delete',
+    responses={
+        '200': 'OK',
+        '401': 'Unauthorized',
+        '404': 'Not Found',
+    })
+@api_view(['PUT', 'DELETE'])
+def update_delete_phone(request, id):
+    data = {}
     try:
         phone = Phone.objects.get(id=id)
     except Phone.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object not found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
         serializer = PhoneSerializer(phone, data=request.data)
@@ -159,32 +174,18 @@ def update_phone(request, id):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
-            return Response(data=data)
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@swagger_auto_schema(method='delete',
-    responses={
-        '200': 'OK',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '404': 'Not Found',
-    })
-@api_view(['DELETE', ])
-def delete_phone(request, id):
-    try:
-        phone = Phone.objects.get(id=id)
-    except Phone.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         operation = phone.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccesful"
+            data["response"] = "Delete failed"
         return Response(data=data)
+
+
 
 
 

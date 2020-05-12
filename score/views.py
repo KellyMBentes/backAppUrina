@@ -23,7 +23,7 @@ def create_score(request):
     data = {}
     try:
         score = Score.objects.get(user=user)
-        data['errors'] = 'duplicate key error collection: user must be unique'
+        data['error'] = "Duplicate key error collection: user can't have more than one score"
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
     except Score.DoesNotExist:
         score = Score(user=user)
@@ -39,21 +39,19 @@ def create_score(request):
 @swagger_auto_schema(method='get',
     responses={
         '200': score_response,
-        '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
     })
 @api_view(['GET'])
-def get_score(request):
-    user = request.user
-
+def get_score(request, pk):
+    data = {}
     try:
-        score = Score.objects.get(user=user)
+        score = Score.objects.get(id=pk)
     except Score.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object not found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        # update_score(user, 120)
         serializer = ScoreSerializer(score)
         return Response(serializer.data)
 

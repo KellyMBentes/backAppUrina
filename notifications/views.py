@@ -57,7 +57,6 @@ def get_option(request, pk):
 @api_view(['POST', ])
 def create_notification(request):
     user = request.user
-
     notification = Notification(user=user)
 
     if request.method == 'POST':
@@ -66,25 +65,6 @@ def create_notification(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@swagger_auto_schema(method='post', request_body=OptionSerializer,
-    responses={
-        '201': 'Created',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-    })
-@api_view(['POST', ])
-def create_option(request, pk):
-    notification = Notification.objects.get(id=pk)
-    option = Option(notification=notification)
-
-    if request.method == 'POST':
-        serializer = OptionSerializer(option, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='put', request_body=NotificationSerializer,
@@ -123,8 +103,33 @@ def update_delete_notification(request, pk):
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccessful"
+            data["response"] = "Delete failed"
         return Response(data=data)
+
+
+@swagger_auto_schema(method='post', request_body=OptionSerializer,
+                     responses={
+                         '201': 'Created',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                     })
+@api_view(['POST', ])
+def create_option(request, pk):
+    data = {}
+    try:
+        notification = Notification.objects.get(id=pk)
+    except Notification.DoesNotExist:
+        data['error'] = "Object not found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+    option = Option(notification=notification)
+
+    if request.method == 'POST':
+        serializer = OptionSerializer(option, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='put', request_body=OptionSerializer,

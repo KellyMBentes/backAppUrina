@@ -153,7 +153,7 @@ def update_delete_peeDiary(request, pk):
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccesful"
+            data["response"] = "Delete failed"
         return Response(data=data)
 
 

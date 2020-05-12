@@ -1,16 +1,14 @@
 from django.urls import path
-from .views import read_personalData, update_personalData, delete_personalData, create_personalData, create_phone, read_phone, update_phone, delete_phone
+from personalData import views
 
 app_name = "personalData"
 
 urlpatterns = [
-    path('create', create_personalData, name='create'),
-    path('<id>/', read_personalData, name='detail'),
-    path('edit/<id>', update_personalData, name='edit'),
-    path('delete/<id>', delete_personalData, name='delete'),
+    path('', views.create_personalData, name='create'),
+    path('<int:id>', views.read_personalData, name='detail'),
+    path('<int:id>/', views.update_delete_personalData, name='edit-or-delete'),
 
-    path('phone/create/<id>', create_phone, name='createPhone'),
-    path('phone/<id>/', read_phone, name='detailPhone'),
-    path('phone/edit/<id>', update_phone, name='editPhone'),
-    path('phone/delete/<id>', delete_phone, name='deletePhone'),
+    path('<int:id>/phone/', views.create_phone, name='create-phone'),
+    path('phone/<int:id>', views.read_phone, name='detail-phone'),
+    path('phone/<int:id>/', views.update_delete_phone, name='edit-delete-phone'),
 ]
