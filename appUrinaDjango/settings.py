@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'liquidIntake',
     'score',
     'chat',
+    'images',
     'django_rest_passwordreset',
     "allauth",
 

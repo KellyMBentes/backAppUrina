@@ -44,6 +44,7 @@ urlpatterns = [
     path('api/news/', include('news.urls', 'api_news')),
     path('api/score/', include('score.urls', 'api_score')),
     path('api/chat/', include('chat.urls', 'api_chat')),
+    path('api/images/', include('images.urls', 'api_images')),
 
 
     # REST FRAMEWORK
