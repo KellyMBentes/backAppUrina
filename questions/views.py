@@ -15,6 +15,7 @@ option_response = openapi.Response('OK', QuestionOptionSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
+        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_questionForm(request):
@@ -31,8 +32,11 @@ def create_questionForm(request):
             serializer = QuestionFormSerializer(questionForm, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+                data['response'] = 'Successfully created object.'
+                data['data'] = serializer.data
+                return Response(data=data, status=status.HTTP_201_CREATED)
+            data['error'] = serializer.errors
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -41,6 +45,7 @@ def create_questionForm(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def read_questionForm(request, pk):
@@ -53,7 +58,7 @@ def read_questionForm(request, pk):
 
     if request.method == 'GET':
         serializer = QuestionFormSerializer(form)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='put', request_body=QuestionFormSerializer,
@@ -62,12 +67,14 @@ def read_questionForm(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_questionForm(request, pk):
@@ -75,8 +82,8 @@ def update_delete_questionForm(request, pk):
     try:
         form = QuestionForm.objects.get(id=pk)
     except QuestionForm.DoesNotExist:
-        data['error'] = "Object not found"
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object Not Found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
         serializer = QuestionFormSerializer(form, data=request.data)
@@ -84,17 +91,20 @@ def update_delete_questionForm(request, pk):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
+            data['data'] = serializer.data
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'DELETE':
         operation = form.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete unsuccessful"
-        return Response(data=data)
+            data["error"] = "Delete unsuccessful"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='post', request_body=QuestionOptionSerializer,
@@ -102,6 +112,7 @@ def update_delete_questionForm(request, pk):
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
+        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_option(request, pk):
@@ -109,7 +120,7 @@ def create_option(request, pk):
     try:
         questionForm = QuestionForm.objects.get(id=pk)
     except QuestionForm.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     option = Option(form=questionForm)
@@ -118,8 +129,11 @@ def create_option(request, pk):
         serializer = QuestionOptionSerializer(option, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            data['response'] = 'Successfully created object.'
+            data['data'] = serializer.data
+            return Response(data=data, status=status.HTTP_201_CREATED)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -128,17 +142,20 @@ def create_option(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def read_option(request, pk):
+    data = {}
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = 'Object not found.'
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = QuestionOptionSerializer(option)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='put', request_body=QuestionOptionSerializer,
@@ -147,12 +164,14 @@ def read_option(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_option(request, pk):
@@ -169,16 +188,19 @@ def update_delete_option(request, pk):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
+            data['data'] = serializer.data
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'DELETE':
         operation = option.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete failed"
-        return Response(data=data)
+            data["error"] = "Delete unsuccessful"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 

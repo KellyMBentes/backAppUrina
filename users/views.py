@@ -80,6 +80,7 @@ decorated_login_view = \
             '201': 'Created',
             '400': 'Bad Request',
             '401': 'Unauthorized',
+            '405': 'Method Not Allowed',
         }
     )(obtain_auth_token)
 
@@ -94,6 +95,7 @@ serializerData2 = openapi.Response('OK', data1Register)
                          '200': serializerData2,
                          '201': 'Created',
                          '400': 'Bad Request',
+                         '405': 'Method Not Allowed',
                      })
 @api_view(['POST', ])
 @permission_classes([AllowAny])
@@ -109,13 +111,19 @@ def registration_view(request):
             sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html', 0)
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
-
+            return Response(data=data, status=status.HTTP_201_CREATED)
         else:
-            data = serializer.errors
-        return Response(data=data)
+            data['error'] = serializer.errors
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Função para realizar a ativação do usuário após clicar no link com uid e token, fornecido por email
+@swagger_auto_schema(method='get',
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '405': 'Method Not Allowed',
+                     })
 @api_view(('GET',))
 @permission_classes([AllowAny])
 def activate(request, uidb64, token):
@@ -130,20 +138,25 @@ def activate(request, uidb64, token):
         user.save()
         data['response'] = 'Succesfully activated user.'
         data['email'] = user.email
+        return Response(data=data, status=status.HTTP_200_OK)
     else:
-        data['response'] = 'User activation failed.'
-    return Response(data=data)
+        data['error'] = 'User activation failed.'
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Função que recebe alguns parâmetros e os repassa para o envio de um email
 def sendEmail(request, user, subject, template, *args):
     mail_subject = subject
     from_email = settings.EMAIL_HOST_USER
+    key = {
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    }
     html_content = render_to_string(template, {
         'user': user,
         'domain': request.get_host(),
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': account_activation_token.make_token(user),
+        'uid': key['uid'],
+        'token': key['token'],
         "password": args[0]
     })
     text_content = strip_tags(html_content)
@@ -159,9 +172,10 @@ class ChangePassword(APIView):
 
     @swagger_auto_schema(method='put', request_body=ChangePasswordSerializer,
                          responses={
-                             '200': 'OK',
+                             '202': 'Accepted',
                              '400': 'Bad Request',
                              '401': 'Unauthorized',
+                             '405': 'Method Not Allowed',
                          })
     @action(detail=True, methods=['put'])
     def put(self, request, *args, **kwargs):
@@ -174,7 +188,7 @@ class ChangePassword(APIView):
             # Checa a senha antiga
             old_password = serializer.data.get("old_password")
             if not self.object.check_password(old_password):
-                data['response'] = 'Wrong password'
+                data['error'] = 'Wrong password'
                 return Response(data=data,
                                 status=status.HTTP_400_BAD_REQUEST)
             # Seta a nova senha fornecida pelo usuário
@@ -182,17 +196,26 @@ class ChangePassword(APIView):
             self.object.save()
             user = request.user
             sendEmail(request, user, 'Your password was changed.', 'change_password.html', 0)
-            data['response'] = 'Password updated succesfully.'
-            return Response(data=data)
+            data['response'] = 'Successfully password updated.'
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
-def randomString(stringLength=8):
+def randomString (length):
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
+    randomLetters = ''.join(random.choice(letters) for i in range(length))
+    randomNumbers = ''.join(str(random.randint(0, 9)) for i in range(length))
+    key = randomLetters + str(randomNumbers)
+    return key
 
-
+@swagger_auto_schema(method='get',
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '405': 'Method Not Allowed',
+                     })
 @api_view(('GET',))
 @permission_classes([AllowAny])
 def passwordReset(request, email):
@@ -201,7 +224,6 @@ def passwordReset(request, email):
         user = CustomUser.objects.get(email=email)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
-    print(user, user.id)
     if user is not None:
         if user.is_active:
             password = randomString()
@@ -211,19 +233,22 @@ def passwordReset(request, email):
             print(user.check_password(password))
             sendEmail(request, user, 'Reset your password.', 'user_reset_password.html', password)
             data['response'] = 'A email of reset was sent.'
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
             data["response"] = "Can't change password until your email is active"
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     else:
-        data['response'] = 'Unidentify email.'
-    return Response(data=data)
+        data['error'] = 'Unidentify email.'
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @swagger_auto_schema(method='put', request_body=ChangePasswordSerializer,
-                     responses={
-                         '200': 'OK',
-                         '400': 'Bad Request',
-                         '401': 'Unauthorized',
-                     })
+                         responses={
+                             '202': 'Accepted',
+                             '400': 'Bad Request',
+                             '405': 'Method Not Allowed',
+                         })
 @api_view(('PUT',))
 @permission_classes([AllowAny])
 def changePasswordReset(request, uidb64, token):
@@ -231,14 +256,14 @@ def changePasswordReset(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64)
         user = CustomUser.objects.get(pk=uid)
-        print(user)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
         # Checa a senha antiga
         old_password = request.data.get("old_password")
+        print(old_password, request.data.get("old_password"), user, user.check_password(old_password))
         if not user.check_password(old_password):
-            data['response'] = 'Wrong password'
+            data['error'] = 'Wrong password'
             return Response(data=data,
                             status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -246,7 +271,7 @@ def changePasswordReset(request, uidb64, token):
             user.set_password(request.data.get("new_password"))
             user.save()
             sendEmail(request, user, 'Your password was changed.', 'change_password.html', 0)
-            data['response'] = 'Password updated succesfully.'
-            return Response(data=data)
-
-    return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
+            data['response'] = 'Successfully password updated.'
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+    data['error'] = user.errors
+    return Response(data=data, status=status.HTTP_400_BAD_REQUEST)

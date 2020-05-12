@@ -16,6 +16,7 @@ score_response = openapi.Response('OK', ScoreSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
+        '405': 'Method Not Allowed',
     })
 @api_view(['POST'])
 def create_score(request):
@@ -23,7 +24,7 @@ def create_score(request):
     data = {}
     try:
         score = Score.objects.get(user=user)
-        data['error'] = "Duplicate key error collection: user can't have more than one score"
+        data['error'] = "Duplicate key error collection: user can't have more than one score."
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
     except Score.DoesNotExist:
         score = Score(user=user)
@@ -32,8 +33,11 @@ def create_score(request):
             serializer = ScoreSerializer(score, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                data['response'] = 'Successfully created object.'
+                data['data'] = serializer.data
+                return Response(data=data, status=status.HTTP_201_CREATED)
+            data['error'] = serializer.errors
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -41,6 +45,7 @@ def create_score(request):
         '200': score_response,
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def get_score(request, pk):
@@ -48,12 +53,12 @@ def get_score(request, pk):
     try:
         score = Score.objects.get(id=pk)
     except Score.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ScoreSerializer(score)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def update_score(user, expGain, multiplier=1):

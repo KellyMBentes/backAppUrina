@@ -13,6 +13,7 @@ import requests
                          '400': 'Bad Request',
                          '401': 'Unauthorized',
                          '404': 'Not Found',
+                         '405': 'Method Not Allowed',
                      })
 @api_view(['GET', ])
 def read_news(request):

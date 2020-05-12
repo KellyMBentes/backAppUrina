@@ -16,17 +16,20 @@ option_response = openapi.Response('OK', OptionSerializer)
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def get_notification(request, pk):
+    data = {}
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = 'Object Not Found.'
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = NotificationSerializer(notification)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='get',
@@ -35,17 +38,20 @@ def get_notification(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def get_option(request, pk):
+    data = {}
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = 'Object Not Found.'
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = OptionSerializer(option)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='post', request_body=NotificationSerializer,
@@ -53,18 +59,23 @@ def get_option(request, pk):
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
+        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_notification(request):
     user = request.user
     notification = Notification(user=user)
+    data = {}
 
     if request.method == 'POST':
         serializer = NotificationSerializer(notification, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            data['response'] = 'Successfully created object.'
+            data['data'] = serializer.data
+            return Response(data=data, status=status.HTTP_201_CREATED)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='put', request_body=NotificationSerializer,
@@ -73,12 +84,14 @@ def create_notification(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete', request_body=NotificationSerializer,
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_notification(request, pk):
@@ -86,7 +99,7 @@ def update_delete_notification(request, pk):
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
-        data['error'] = "Object Not Found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
@@ -95,16 +108,20 @@ def update_delete_notification(request, pk):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
+            data['data'] = serializer.data
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     elif request.method == 'DELETE':
         operation = notification.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete failed"
-        return Response(data=data)
+            data["error"] = "Delete unsuccessful"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='post', request_body=OptionSerializer,
@@ -112,6 +129,7 @@ def update_delete_notification(request, pk):
                          '201': 'Created',
                          '400': 'Bad Request',
                          '401': 'Unauthorized',
+                         '405': 'Method Not Allowed',
                      })
 @api_view(['POST', ])
 def create_option(request, pk):
@@ -119,7 +137,7 @@ def create_option(request, pk):
     try:
         notification = Notification.objects.get(id=pk)
     except Notification.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     option = Option(notification=notification)
@@ -128,7 +146,9 @@ def create_option(request, pk):
         serializer = OptionSerializer(option, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            data['response'] = 'Successfully object created.'
+            data['data'] = serializer.data
+            return Response(data=data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -138,12 +158,14 @@ def create_option(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_option(request, pk):
@@ -151,7 +173,7 @@ def update_delete_option(request, pk):
     try:
         option = Option.objects.get(id=pk)
     except Option.DoesNotExist:
-        data['error'] = 'Object not found'
+        data['error'] = 'Object Not Found.'
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
@@ -160,14 +182,17 @@ def update_delete_option(request, pk):
         if serializer.is_valid():
             serializer.save()
             data["response"] = "Update successful"
+            data['data'] = serializer.data
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         operation = option.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete failed"
-        return Response(data=data)
+            data["response"] = "Delete unsuccessful"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)

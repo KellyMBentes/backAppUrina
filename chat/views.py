@@ -17,6 +17,7 @@ chat_response = openapi.Response('OK', MessageSerializer)
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
+        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def message_list(request, receiver=None):
@@ -63,6 +64,7 @@ def message_list(request, receiver=None):
                          '201': 'Created',
                          '400': 'Bad Request',
                          '401': 'Unauthorized',
+                         '405': 'Method Not Allowed',
                      })
 @api_view(['POST', ])
 def message_post(request, sender=None, receiver=None):
@@ -73,5 +75,5 @@ def message_post(request, sender=None, receiver=None):
         serializer = MessageSerializer(message, data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
