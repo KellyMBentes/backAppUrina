@@ -5,5 +5,5 @@ app_name = 'medicines'
 
 urlpatterns = [
     path('', views.create_med, name="create"),
-    path('list', views.read_med, name="detail"),
+    path('medicines-list', views.read_med, name="detail"),
 ]

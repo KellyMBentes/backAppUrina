@@ -5,7 +5,7 @@ from medicines.models import Medicine
 
 class AdverseReaction(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    medicine=models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     date = models.DateField()
     skin_rash = models.BooleanField(default=False)
     skin_swelling = models.BooleanField(default=False)

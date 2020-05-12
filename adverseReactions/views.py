@@ -23,7 +23,7 @@ def create_adverseReaction(request):
     try:
         medicine = Medicine.objects.get(id=request.data["medicine"])
     except Medicine.DoesNotExist:
-        data["error"] = "Object not found"
+        data['error'] = "Object not found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
     adverseReaction = AdverseReaction(user=user, medicine=medicine)
 
@@ -47,7 +47,7 @@ def read_adverseReaction(request, id):
     data = {}
     try:
         adverseReaction = AdverseReaction.objects.get(id=id)
-    except adverseReaction.DoesNotExist:
+    except AdverseReaction.DoesNotExist:
         data['error'] = "Object not found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
