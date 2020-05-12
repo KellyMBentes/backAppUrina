@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'images',
     'django_rest_passwordreset',
     "allauth",
-
+    "medicines",
+    "adverseReactions"
 ]
 
 REST_FRAMEWORK = {
