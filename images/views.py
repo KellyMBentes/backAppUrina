@@ -29,7 +29,6 @@ user = auth.sign_in_with_email_and_password("conectaservicos9@gmail.com", "tride
 db = firebase.database()
 
 
-
 @swagger_auto_schema(method='post', request_body=ImageSerializer,
     responses={
         '201': 'Created',
@@ -45,7 +44,7 @@ def create_image(request):
         data = {"user": user.id, "image": request.data["image"]}
         img = db.child("image").push(data)
         image = Image(user=user)
-        data = { }
+        data = {}
         data['firebaseKey'] = img['name']
         serializer = ImageSerializer(image, data=data)
         if serializer.is_valid():
@@ -66,13 +65,14 @@ def read_image(request, id):
     data = {}
     try:
         image = Image.objects.get(id=id)
+        db = firebase.database()
+        img = db.child("image").child(image.firebaseKey).get()
+        data = img.val()
     except Image.DoesNotExist:
         data['error'] = "Object not found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-
     if request.method == 'GET':
-        serializer = ImageSerializer(image)
-        return Response(serializer.data)
+        return Response(data)
 
 
 @swagger_auto_schema(method='put', request_body=ImageSerializer,
@@ -90,24 +90,27 @@ def read_image(request, id):
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_image(request, id):
+    data = {}
     try:
         image = Image.objects.get(id=id)
     except Image.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = 'Object not found'
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
-        serializer = ImageSerializer(image, data=request.data)
+        db = firebase.database()
+        db.child("image").child(image.firebaseKey).update({"image": request.data["image"]})
         data = {}
-        if serializer.is_valid():
-            serializer.save()
-            data['response'] = 'Update successful'
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['response'] = 'Update successful'
+        return Response(data=data, status=status.HTTP_202_ACCEPTED)
+
     elif request.method == 'DELETE':
+        db = firebase.database()
+        db.child("image").child(image.firebaseKey).remove()
         operation = image.delete()
         data = {}
         if operation:
             data["response"] = "Delete successful"
         else:
-            data["response"] = "Delete unsuccessful"
+            data["response"] = "Delete failed"
         return Response(data=data)
