@@ -106,7 +106,7 @@ def registration_view(request):
             user = serializer.save()
             user.is_active = False
             user.save()
-            sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html',0)
+            sendEmail(request, user, 'Activate your account! Team Plethora', 'active_email.html', 0)
             data['response'] = 'Succesfully registered a new user, but not yet activated.'
             data['email'] = user.email
 
@@ -137,7 +137,6 @@ def activate(request, uidb64, token):
 
 # Função que recebe alguns parâmetros e os repassa para o envio de um email
 def sendEmail(request, user, subject, template, *args):
-
     mail_subject = subject
     from_email = settings.EMAIL_HOST_USER
     html_content = render_to_string(template, {
@@ -204,6 +203,7 @@ def passwordReset(request, email):
         user = None
     print(user, user.id)
     if user is not None:
+        if user.is_active:
             password = randomString()
             print(password)
             user.set_password(password)
@@ -211,16 +211,19 @@ def passwordReset(request, email):
             print(user.check_password(password))
             sendEmail(request, user, 'Reset your password.', 'user_reset_password.html', password)
             data['response'] = 'A email of reset was sent.'
+        else:
+            data["response"] = "Can't change password until your email is active"
     else:
         data['response'] = 'Unidentify email.'
     return Response(data=data)
 
+
 @swagger_auto_schema(method='put', request_body=ChangePasswordSerializer,
-                         responses={
-                             '200': 'OK',
-                             '400': 'Bad Request',
-                             '401': 'Unauthorized',
-                         })
+                     responses={
+                         '200': 'OK',
+                         '400': 'Bad Request',
+                         '401': 'Unauthorized',
+                     })
 @api_view(('PUT',))
 @permission_classes([AllowAny])
 def changePasswordReset(request, uidb64, token):
@@ -232,17 +235,17 @@ def changePasswordReset(request, uidb64, token):
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-            # Checa a senha antiga
+        # Checa a senha antiga
         old_password = request.data.get("old_password")
         if not user.check_password(old_password):
             data['response'] = 'Wrong password'
             return Response(data=data,
                             status=status.HTTP_400_BAD_REQUEST)
         else:
-        # Seta a nova senha fornecida pelo usuário
+            # Seta a nova senha fornecida pelo usuário
             user.set_password(request.data.get("new_password"))
             user.save()
-            sendEmail(request, user, 'Your password was changed.', 'change_password.html',0)
+            sendEmail(request, user, 'Your password was changed.', 'change_password.html', 0)
             data['response'] = 'Password updated succesfully.'
             return Response(data=data)
 
