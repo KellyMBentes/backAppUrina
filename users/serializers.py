@@ -55,14 +55,13 @@ class MyAuthTokenSerializer(serializers.Serializer):
             else:
                 try:
                     user = CustomUser.objects.get(email=email)
-                except:
-                    user = None
-                if user is not None:
-                    if not user.is_active:
-                        msg = _('User account is disabled.')
-                        raise exceptions.ValidationError(msg)
-
-                else:
+                except CustomUser.DoesNotExist:
+                    msg = _('Unable to log in with provided credentials.')
+                    raise exceptions.ValidationError(msg)
+                if not user.is_active:
+                    msg = _('User account is disabled.')
+                    raise exceptions.ValidationError(msg)
+                if not user.check_password(password):
                     msg = _('Unable to log in with provided credentials.')
                     raise exceptions.ValidationError(msg)
         else:
