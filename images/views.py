@@ -50,7 +50,8 @@ def create_image(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -69,10 +70,10 @@ def read_image(request, id):
         img = db.child("image").child(image.firebaseKey).get()
         data = img.val()
     except Image.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        return Response(data)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='put', request_body=ImageSerializer,
@@ -94,7 +95,7 @@ def update_delete_image(request, id):
     try:
         image = Image.objects.get(id=id)
     except Image.DoesNotExist:
-        data['error'] = 'Object not found'
+        data['error'] = 'Object Not Found.'
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
@@ -111,6 +112,7 @@ def update_delete_image(request, id):
         data = {}
         if operation:
             data["response"] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete failed"
-        return Response(data=data)
+            data["error"] = "Delete failed"
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
