@@ -22,7 +22,6 @@ peeVolume = openapi.Parameter('peeVolume', in_=openapi.IN_QUERY, type=openapi.TY
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def read_peeDiary(request, pk):
@@ -35,7 +34,28 @@ def read_peeDiary(request, pk):
 
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
+    responses={
+        '201': 'Created',
+        '400': 'Bad Request',
+        '401': 'Unauthorized',
+    })
+@api_view(['POST'])
+def create_peeDiary(request):
+    user = request.user
+    peeDiary = PeeDiary(user=user)
+    data = {}
+    if request.method == 'POST':
+        serializer = PeeDiarySerializer(peeDiary, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            valid_score(user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -46,31 +66,10 @@ def read_peeDiary(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
-@swagger_auto_schema(method='post', request_body=PeeDiarySerializer,
-    responses={
-        '201': 'Created',
-        '400': 'Bad Request',
-        '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
-    })
-@api_view(['GET', 'POST'])
-def create_list_peeDiary(request):
+@api_view(['GET', ])
+def list_peeDiary(request):
     user = request.user
-    peeDiary = PeeDiary(user=user)
-    data = {}
-    if request.method == 'POST':
-        serializer = PeeDiarySerializer(peeDiary, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            valid_score(user)
-            data['response'] = 'Successfully created object.'
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_201_CREATED)
-        data['error'] = serializer.errors
-        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
     data = {}
     try:
         offset = request.query_params.get('offset', None)
@@ -117,7 +116,7 @@ def create_list_peeDiary(request):
     if request.method == 'GET':
         serializer = PeeDiarySerializer(pee, many=True)
         if serializer.data.__len__() == 0:
-            data["error"] = "Could not retrieve any peeDiary."
+            data['error'] = "Could not retrieve any pee diary."
             return Response(data=data, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -129,14 +128,12 @@ def create_list_peeDiary(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_peeDiary(request, pk):
@@ -152,9 +149,7 @@ def update_delete_peeDiary(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Update successful"
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -162,10 +157,10 @@ def update_delete_peeDiary(request, pk):
         operation = pee.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete unsuccessful"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 

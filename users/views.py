@@ -95,7 +95,6 @@ serializerData2 = openapi.Response('OK', data1Register)
                          '200': serializerData2,
                          '201': 'Created',
                          '400': 'Bad Request',
-                         '405': 'Method Not Allowed',
                      })
 @api_view(['POST', ])
 @permission_classes([AllowAny])
@@ -122,7 +121,6 @@ def registration_view(request):
                      responses={
                          '200': 'OK',
                          '400': 'Bad Request',
-                         '405': 'Method Not Allowed',
                      })
 @api_view(('GET',))
 @permission_classes([AllowAny])
@@ -203,18 +201,18 @@ class ChangePassword(APIView):
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
-def randomString (length):
+def randomString(length):
     letters = string.ascii_lowercase
     randomLetters = ''.join(random.choice(letters) for i in range(length))
     randomNumbers = ''.join(str(random.randint(0, 9)) for i in range(length))
     key = randomLetters + str(randomNumbers)
     return key
 
+
 @swagger_auto_schema(method='get',
                      responses={
                          '200': 'OK',
                          '400': 'Bad Request',
-                         '405': 'Method Not Allowed',
                      })
 @api_view(('GET',))
 @permission_classes([AllowAny])
@@ -247,7 +245,6 @@ def passwordReset(request, email):
                          responses={
                              '202': 'Accepted',
                              '400': 'Bad Request',
-                             '405': 'Method Not Allowed',
                          })
 @api_view(('PUT',))
 @permission_classes([AllowAny])

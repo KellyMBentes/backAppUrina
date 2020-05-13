@@ -1,9 +1,8 @@
-from json import JSONDecodeError
-
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
+from json import JSONDecodeError
 import requests
 
 
@@ -13,7 +12,6 @@ import requests
                          '400': 'Bad Request',
                          '401': 'Unauthorized',
                          '404': 'Not Found',
-                         '405': 'Method Not Allowed',
                      })
 @api_view(['GET', ])
 def read_news(request):

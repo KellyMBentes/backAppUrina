@@ -15,7 +15,6 @@ option_response = openapi.Response('OK', QuestionOptionSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_questionForm(request):
@@ -32,9 +31,7 @@ def create_questionForm(request):
             serializer = QuestionFormSerializer(questionForm, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                data['response'] = 'Successfully created object.'
-                data['data'] = serializer.data
-                return Response(data=data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             data['error'] = serializer.errors
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -45,7 +42,6 @@ def create_questionForm(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def read_questionForm(request, pk):
@@ -67,14 +63,12 @@ def read_questionForm(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_questionForm(request, pk):
@@ -90,20 +84,18 @@ def update_delete_questionForm(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Update successful"
-            data['data'] = serializer.data
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
-        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'DELETE':
         operation = form.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["error"] = "Delete unsuccessful"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -112,7 +104,6 @@ def update_delete_questionForm(request, pk):
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_option(request, pk):
@@ -129,9 +120,7 @@ def create_option(request, pk):
         serializer = QuestionOptionSerializer(option, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Successfully created object.'
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -142,7 +131,6 @@ def create_option(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def read_option(request, pk):
@@ -164,14 +152,12 @@ def read_option(request, pk):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_option(request, pk):
@@ -187,9 +173,7 @@ def update_delete_option(request, pk):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Update successful"
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -197,10 +181,10 @@ def update_delete_option(request, pk):
         operation = option.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["error"] = "Delete unsuccessful"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 

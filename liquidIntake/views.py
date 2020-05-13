@@ -14,7 +14,6 @@ liquid_intake_response = openapi.Response('OK', LiquidIntakeSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_liquidIntake(request):
@@ -25,9 +24,7 @@ def create_liquidIntake(request):
         serializer = LiquidIntakeSerializer(liquidIntake, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Successfully created object.'
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -38,7 +35,6 @@ def create_liquidIntake(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def read_liquidIntake(request, id):
@@ -60,14 +56,12 @@ def read_liquidIntake(request, id):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete', request_body=LiquidIntakeSerializer,
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_liquidIntake(request, id):
@@ -83,9 +77,7 @@ def update_delete_liquidIntake(request, id):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Update successful'
-            data['data']= serializer.data
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -93,8 +85,8 @@ def update_delete_liquidIntake(request, id):
         operation = liquid.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['error'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["response"] = "Delete unsuccessful"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)

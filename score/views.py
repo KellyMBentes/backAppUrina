@@ -16,7 +16,6 @@ score_response = openapi.Response('OK', ScoreSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
     })
 @api_view(['POST'])
 def create_score(request):
@@ -33,9 +32,7 @@ def create_score(request):
             serializer = ScoreSerializer(score, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                data['response'] = 'Successfully created object.'
-                data['data'] = serializer.data
-                return Response(data=data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             data['error'] = serializer.errors
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -45,7 +42,6 @@ def create_score(request):
         '200': score_response,
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET'])
 def get_score(request, pk):

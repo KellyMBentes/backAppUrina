@@ -17,7 +17,6 @@ phone_response = openapi.Response('OK', PhoneSerializer)
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
     })
 @api_view(['POST', ])
 def create_personalData(request):
@@ -34,9 +33,7 @@ def create_personalData(request):
         serializer = PersonalDataSerializer(personal, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Successfully created object.'
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,7 +44,6 @@ def create_personalData(request):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def read_personalData(request, id):
@@ -63,21 +59,18 @@ def read_personalData(request, id):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 @swagger_auto_schema(method='put', request_body=PersonalDataSerializer,
     responses={
         '202': 'Accepted',
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_personalData(request, id):
@@ -93,9 +86,7 @@ def update_delete_personalData(request, id):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Update successful"
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,10 +94,10 @@ def update_delete_personalData(request, id):
         operation = personal.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["error"] = "Delete unsuccessful"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -115,8 +106,6 @@ def update_delete_personalData(request, id):
         '201': 'Created',
         '400': 'Bad Request',
         '401': 'Unauthorized',
-        '405': 'Method Not Allowed',
-
     })
 @api_view(['POST', ])
 def create_phone(request, id):
@@ -134,9 +123,7 @@ def create_phone(request, id):
         if serializer.is_valid():
             serializer.save()
             personal.save()
-            data['response'] = 'Successfully created object.'
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,7 +134,6 @@ def create_phone(request, id):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['GET', ])
 def read_phone(request, id):
@@ -169,14 +155,12 @@ def read_phone(request, id):
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @swagger_auto_schema(method='delete',
     responses={
         '200': 'OK',
         '401': 'Unauthorized',
         '404': 'Not Found',
-        '405': 'Method Not Allowed',
     })
 @api_view(['PUT', 'DELETE'])
 def update_delete_phone(request, id):
@@ -192,9 +176,7 @@ def update_delete_phone(request, id):
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Update successful"
-            data['data'] = serializer.data
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         data['error'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -202,10 +184,10 @@ def update_delete_phone(request, id):
         operation = phone.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
             return Response(data=data, status=status.HTTP_200_OK)
         else:
-            data["error"] = "Delete failed"
+            data['error'] = "Delete failed"
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 

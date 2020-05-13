@@ -19,18 +19,13 @@ urlpatterns = [
     path('api/documentation/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/documentation-redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/documentation/', schema_view),
-    path('api/user/', include('users.urls', 'api_users')),
-    path('api/personal-data/', include('personalData.urls', 'api_personalData')),
-    path('api/notification/', include('notifications.urls', 'api_notifications')),
-    path('api/liquid-intake/', include('liquidIntake.urls', 'api_liquidIntake')),
-    path('api/pee-diary/', include('peeDiary.urls', 'api_peeDiary')),
-    path('api/question/', include('questions.urls', 'api_questions')),
-    path('api/news/', include('news.urls', 'api_news')),
-    path('api/score/', include('score.urls', 'api_score')),
-    path('api/chat/', include('chat.urls', 'api_chat')),
-    path('api/images/', include('images.urls', 'api_images')),
-
-
-    # REST FRAMEWORK
-    # path('api/', include('api.urls', 'api')),
+    path('api/user', include('users.urls', 'api_users')),
+    path('api/personal-data', include('personalData.urls', 'api_personalData')),
+    path('api/notification', include('notifications.urls', 'api_notifications')),
+    path('api/liquid-intake', include('liquidIntake.urls', 'api_liquidIntake')),
+    path('api/pee-diary', include('peeDiary.urls', 'api_peeDiary')),
+    path('api/question', include('questions.urls', 'api_questions')),
+    path('api/news', include('news.urls', 'api_news')),
+    path('api/score', include('score.urls', 'api_score')),
+    path('api/chat', include('chat.urls', 'api_chat')),
 ]
