@@ -23,7 +23,7 @@ def create_adverseReaction(request):
     try:
         medicine = Medicine.objects.get(id=request.data["medicine"])
     except Medicine.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
     adverseReaction = AdverseReaction(user=user, medicine=medicine)
 
@@ -48,7 +48,7 @@ def read_adverseReaction(request, id):
     try:
         adverseReaction = AdverseReaction.objects.get(id=id)
     except AdverseReaction.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found"
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -71,24 +71,27 @@ def read_adverseReaction(request, id):
                      })
 @api_view(['PUT', 'DELETE'])
 def update_delete_adverseReaction(request, id):
+    data = {}
     try:
         adverseReaction = AdverseReaction.objects.get(id=id)
     except AdverseReaction.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data['error'] = "Object Not Found"
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
         serializer = AdverseReactionSerializer(adverseReaction, data=request.data)
         data = {}
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Update successful'
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'DELETE':
         operation = adverseReaction.delete()
         data = {}
         if operation:
-            data["response"] = "Delete successful"
+            data['response'] = "Delete successful"
         else:
-            data["response"] = "Delete failed"
+            data['error'] = "Delete failed"
         return Response(data=data)
