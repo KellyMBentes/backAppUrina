@@ -10,7 +10,7 @@ from medicines.models import Medicine
 adverse_reaction_response = openapi.Response('OK', AdverseReactionSerializer)
 
 
-@swagger_auto_schema(method='post', request_body=AdverseReaction,
+@swagger_auto_schema(method='post', request_body=AdverseReactionSerializer,
                      responses={
                          '201': 'Created',
                          '400': 'Bad Request',
@@ -23,7 +23,7 @@ def create_adverseReaction(request):
     try:
         medicine = Medicine.objects.get(id=request.data["medicine"])
     except Medicine.DoesNotExist:
-        data['error'] = "Object Not Found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
     adverseReaction = AdverseReaction(user=user, medicine=medicine)
 
@@ -32,7 +32,8 @@ def create_adverseReaction(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+        data['error'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get',
@@ -53,7 +54,7 @@ def read_adverseReaction(request, id):
 
     if request.method == 'GET':
         serializer = AdverseReactionSerializer(adverseReaction)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='put', request_body=AdverseReactionSerializer,
@@ -92,6 +93,7 @@ def update_delete_adverseReaction(request, id):
         data = {}
         if operation:
             data['response'] = "Delete successful"
+            return Response(data=data, status=status.HTTP_200_OK)
         else:
             data['error'] = "Delete failed"
-        return Response(data=data)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)

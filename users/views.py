@@ -178,7 +178,6 @@ class ChangePassword(APIView):
     @action(detail=True, methods=['put'])
     def put(self, request, *args, **kwargs):
         data = {}
-        print(request.user)
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         data = {}
@@ -209,31 +208,31 @@ def randomString(length):
     return key
 
 
-@swagger_auto_schema(method='get',
+@swagger_auto_schema(method='put',
                      responses={
-                         '200': 'OK',
+                         '202': 'Accepted',
                          '400': 'Bad Request',
+                         '401': 'Unathorized',
                      })
-@api_view(('GET',))
+@api_view(('PUT',))
 @permission_classes([AllowAny])
-def passwordReset(request, email):
+def passwordReset(request):
     data = {}
+    email = request.data['email']
     try:
         user = CustomUser.objects.get(email=email)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None:
         if user.is_active:
-            password = randomString()
-            print(password)
+            password = randomString(4)
             user.set_password(password)
             user.save()
-            print(user.check_password(password))
             sendEmail(request, user, 'Reset your password.', 'user_reset_password.html', password)
-            data['response'] = 'A email of reset was sent.'
-            return Response(data=data, status=status.HTTP_200_OK)
+            data['response'] = 'A reset email was sent.'
+            return Response(data=data, status=status.HTTP_202_ACCEPTED)
         else:
-            data["response"] = "Can't change password until your email is active"
+            data["error"] = "Can't change password until your email is active"
             return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     else:
         data['error'] = 'Unidentify email.'
@@ -258,7 +257,6 @@ def changePasswordReset(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         # Checa a senha antiga
         old_password = request.data.get("old_password")
-        print(old_password, request.data.get("old_password"), user, user.check_password(old_password))
         if not user.check_password(old_password):
             data['error'] = 'Wrong password'
             return Response(data=data,

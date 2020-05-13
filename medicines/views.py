@@ -20,12 +20,12 @@ def read_med(request):
     try:
         med = Medicine.objects.all()
     except Medicine.DoesNotExist:
-        data['error'] = "Object not found"
+        data['error'] = "Object Not Found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = MedicineSerializer(med, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(method='post', request_body=MedicineSerializer,
