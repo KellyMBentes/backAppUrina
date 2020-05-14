@@ -29,5 +29,6 @@ urlpatterns = [
     path('api/score', include('score.urls', 'api_score')),
     path('api/chat', include('chat.urls', 'api_chat')),
     path('api/medicines', include('medicines.urls', 'api_medicines')),
-    path('api/adverseReactions', include('adverseReactions.urls', 'api_adverseReactions'))
+    path('api/adverseReactions', include('adverseReactions.urls', 'api_adverseReactions')),
+    path('api/images', include('images.urls', 'api_images'))
 ]
