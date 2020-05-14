@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/news', include('news.urls', 'api_news')),
     path('api/score', include('score.urls', 'api_score')),
     path('api/chat', include('chat.urls', 'api_chat')),
-    path('api/medicines', include('medicines.urls', 'api_medicines')),
-    path('api/adverseReactions', include('adverseReactions.urls', 'api_adverseReactions')),
-    path('api/images', include('images.urls', 'api_images'))
+    path('api/medicine', include('medicines.urls', 'api_medicines')),
+    path('api/adverseReaction', include('adverseReactions.urls', 'api_adverseReactions')),
+    path('api/image', include('images.urls', 'api_images'))
 ]
