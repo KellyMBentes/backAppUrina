@@ -57,9 +57,10 @@ INSTALLED_APPS = [
     'chat',
     'images',
     'django_rest_passwordreset',
-    "allauth",
-    "medicines",
-    "adverseReactions"
+    'allauth',
+    'medicines',
+    'adverseReactions',
+    'images',
 ]
 
 REST_FRAMEWORK = {
@@ -120,11 +121,26 @@ AUTHENTICATION_BACKENDS = (
 
 WSGI_APPLICATION = 'appUrinaDjango.wsgi.application'
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'appUrina',
+    }
+}
+'''
+
+DATABASE_CONNECTION_POOLING = False
+DATABASES = {
+    'default': {
+        'NAME': 'Urina_DB',
+        'ENGINE': 'sql_server.pyodbc',
+        'HOST': 'urina.database.windows.net',
+        'USER': 'adm',
+        'PASSWORD': '@Senha123',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
 
